@@ -7,7 +7,9 @@ from flask import Flask,request
 from flask_socketio import SocketIO,send,emit
 from medieval_converter import convert_func
 import random
-
+import os
+from dotenv import load_dotenv
+load_dotenv()
 app=Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 
@@ -122,4 +124,5 @@ def handle_message(msg,username):
 
 if __name__=='__main__':
     print("hwelloo")
-    socketio.run(app,host='0.0.0.0',port=3000,debug=True)
+    port = int(os.environ.get("PORT", 3000))  # Use 3000 locally, or Railway's port in production
+    socketio.run(app,host='0.0.0.0',port=port,debug=True)
