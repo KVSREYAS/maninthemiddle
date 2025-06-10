@@ -74,34 +74,83 @@ const SocketTest: React.FC = () => {
             <div className="bg-gradient-to-br from-[#1a1a2e] to-[#16213e] p-8 rounded-xl shadow-xl w-full max-w-lg mt-24 relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent pointer-events-none"></div>
               <div className="relative z-10">
-                <h2 className="text-3xl font-bold text-center mb-8 text-white">
-                  Join a Room
-                </h2>
-                <div className="space-y-4">
-                  <input
-                    className="w-full p-3 bg-[#141414]/30 rounded-lg outline-none text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500/30 transition-all backdrop-blur-sm"
-                    type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Your name"
-                  />
-                  <input
-                    className="w-full p-3 bg-[#141414]/30 rounded-lg outline-none text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500/30 transition-all backdrop-blur-sm"
-                    type="text"
-                    value={roomid}
-                    onChange={(e) => setRoomid(e.target.value)}
-                    placeholder="Room ID"
-                  />
+                <style>
+                  {`
+                    @keyframes float {
+                      0% { transform: translateY(0px); }
+                      50% { transform: translateY(-10px); }
+                      100% { transform: translateY(0px); }
+                    }
+                    @keyframes glow {
+                      0% { text-shadow: 0 0 10px rgba(59, 130, 246, 0.5); }
+                      50% { text-shadow: 0 0 20px rgba(59, 130, 246, 0.8); }
+                      100% { text-shadow: 0 0 10px rgba(59, 130, 246, 0.5); }
+                    }
+                    @keyframes shimmer {
+                      0% { background-position: -200% center; }
+                      100% { background-position: 200% center; }
+                    }
+                    .title-container {
+                      animation: float 6s ease-in-out infinite;
+                    }
+                    .title-text {
+                      animation: glow 3s ease-in-out infinite;
+                    }
+                    .input-field {
+                      background: linear-gradient(90deg, rgba(20, 20, 20, 0.3) 0%, rgba(20, 20, 20, 0.4) 50%, rgba(20, 20, 20, 0.3) 100%);
+                      background-size: 200% 100%;
+                      animation: shimmer 3s infinite linear;
+                    }
+                    .input-field:focus {
+                      animation: none;
+                      background: rgba(20, 20, 20, 0.4);
+                    }
+                  `}
+                </style>
+                <div className="title-container mb-8">
+                  <h2 className="text-4xl font-bold text-center text-white title-text">
+                    Enter the Realm
+                  </h2>
+                  <p className="text-gray-400 text-center mt-2 italic">
+                    Forge your identity and join the gathering
+                  </p>
+                </div>
+                <div className="space-y-6">
+                  <div className="relative">
+                    <input
+                      className="w-full p-4 input-field rounded-lg outline-none text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500/30 transition-all backdrop-blur-sm border border-gray-700/50"
+                      type="text"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      placeholder="Your name"
+                    />
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                      👤
+                    </div>
+                  </div>
+                  <div className="relative">
+                    <input
+                      className="w-full p-4 input-field rounded-lg outline-none text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500/30 transition-all backdrop-blur-sm border border-gray-700/50"
+                      type="text"
+                      value={roomid}
+                      onChange={(e) => setRoomid(e.target.value)}
+                      placeholder="Room ID"
+                    />
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                      🏰
+                    </div>
+                  </div>
                   <button
                     onClick={joinChat}
-                    className="w-full bg-blue-600 hover:bg-blue-700 px-4 py-3 rounded-lg font-medium text-white transition-all transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-blue-500/25"
+                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 px-6 py-4 rounded-lg font-medium text-white transition-all transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-blue-500/25 flex items-center justify-center space-x-2"
                   >
-                    Join
+                    <span>Enter Realm</span>
+                    <span className="text-xl">⚔️</span>
                   </button>
                   {invalid_roomid && (
-                    <p className="text-red-400 text-center mt-2">
-                      Invalid Room ID
-                    </p>
+                    <div className="bg-red-500/10 border border-red-500/20 p-3 rounded-lg text-red-400 text-center animate-pulse">
+                      ⚠️ Invalid Room ID - The realm you seek does not exist
+                    </div>
                   )}
                 </div>
               </div>
