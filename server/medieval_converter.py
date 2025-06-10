@@ -2,11 +2,14 @@
 from langchain.prompts import ChatPromptTemplate
 from langchain.chains import LLMChain
 from langchain_groq import ChatGroq
-
+from dotenv import load_dotenv
+import os
 # Initialize the Groq LLM
+load_dotenv()
+# api_key=os.getenv("GROQ_API_KEY")
 llm = ChatGroq(
-    model_name="llama-3.3-70b-versatile",  # or "llama3-70b-8192", "mixtral-8x7b-32768", etc.
-    groq_api_key="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"  # Optional if already in env vars
+    model_name="llama-3.3-70b-versatile" # or "llama3-70b-8192", "mixtral-8x7b-32768", etc.
+
 )
 
 # Define the prompt template
