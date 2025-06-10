@@ -1,0 +1,372 @@
+/* SocketTest.css */
+
+:root {
+  --bg-dark: #121212;
+  --bg-darker: #1e1e1e;
+  --bg-darkest: #141414;
+  --bg-input: #23272f;
+  --bg-input-focus: #313543;
+  --text-white: #f3f4f6;
+  --text-gray: #b0b3b8;
+  --text-red: #f87171;
+  --text-red-dark: #dc2626;
+  --text-yellow: #d97706;
+  --text-yellow-dark: #b45309;
+  --text-green: #16a34a;
+  --text-green-dark: #15803d;
+  --border-gray: #4b5563;
+  --border-focus: #2563eb;
+  --shadow-dark: 0 8px 32px 0 rgba(0,0,0,0.45);
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
+  background-color: var(--bg-dark);
+  color: var(--text-white);
+}
+
+.min-h-screen {
+  min-height: 100vh;
+  padding: 2rem;
+  /* background: linear-gradient(135deg, #181c24 0%, #23272f 100%); */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 80%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.flex {
+  display: flex;
+  width: 100%;
+  max-width: 100%;
+}
+
+.flex-col {
+  flex-direction: column;
+  width: 100%;
+}
+
+.flex-row {
+  flex-direction: row;
+  width: 100%;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.w-full {
+  width: 100%;
+  max-width: 100%;
+}
+
+.max-w-lg {
+  max-width: 100%;
+}
+
+.mt-24 {
+  margin-top: 6rem;
+}
+
+.mt-16 {
+  margin-top: 4rem;
+}
+
+.mb-4 {
+  margin-bottom: 1rem;
+}
+
+.mb-6 {
+  margin-bottom: 1.5rem;
+}
+
+.mb-1 {
+  margin-bottom: 0.25rem;
+}
+
+.mt-2 {
+  margin-top: 0.5rem;
+}
+
+.gap-6 {
+  gap: 1.5rem;
+}
+
+.p-3 {
+  padding: 0.75rem;
+}
+
+.p-4 {
+  padding: 1rem;
+}
+
+.p-6 {
+  padding: 1.5rem;
+}
+
+.p-8 {
+  padding: 2rem;
+}
+
+.rounded {
+  border-radius: 0.375rem; /* 6px */
+}
+
+.rounded-xl {
+  border-radius: 1rem; /* 16px */
+}
+
+.shadow-lg {
+  box-shadow: var(--shadow-dark) !important;
+}
+
+.shadow-xl {
+  box-shadow: var(--shadow-dark) !important;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-sm {
+  font-size: 0.875rem;
+}
+
+.text-lg {
+  font-size: 1.125rem;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.bg-dark {
+  background-color: var(--bg-dark);
+}
+
+.bg-darker {
+  background-color: var(--bg-darker);
+}
+
+.bg-darkest {
+  background-color: var(--bg-darkest);
+}
+
+.bg-input {
+  background-color: var(--bg-input);
+}
+
+.bg-blue-600 {
+  background: linear-gradient(90deg, #2563eb 60%, #1d4ed8 100%);
+}
+
+.bg-blue-600:hover {
+  background: linear-gradient(90deg, #1d4ed8 60%, #2563eb 100%);
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 4px 16px 0 rgba(37,99,235,0.18);
+}
+
+.bg-green-600 {
+  background: linear-gradient(90deg, #16a34a 60%, #15803d 100%);
+}
+
+.bg-green-600:hover {
+  background: linear-gradient(90deg, #15803d 60%, #16a34a 100%);
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 4px 16px 0 rgba(22,163,74,0.18);
+}
+
+.bg-yellow-600 {
+  background: linear-gradient(90deg, #d97706 60%, #b45309 100%);
+}
+
+.bg-yellow-600:hover {
+  background: linear-gradient(90deg, #b45309 60%, #d97706 100%);
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 4px 16px 0 rgba(217,119,6,0.18);
+}
+
+.text-white {
+  color: var(--text-white);
+}
+
+.text-red-500 {
+  color: var(--text-red);
+}
+
+.text-red-400 {
+  color: var(--text-red-dark);
+}
+
+.border {
+  border-style: solid;
+  border-width: 1px;
+}
+
+.border-gray-700 {
+  border-color: #374151;
+}
+
+.border-gray-600 {
+  border-color: var(--border-gray);
+}
+
+.overflow-y-auto {
+  overflow-y: auto;
+}
+
+.h-96 {
+  height: 100%;
+  min-height: 24rem;
+  background: linear-gradient(135deg, #181c24 0%, #23272f 100%);
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-gray);
+  color: var(--text-gray);
+  font-size: 1rem;
+  padding: 1.25rem;
+  transition: box-shadow 0.2s;
+}
+
+.h-96::-webkit-scrollbar {
+  width: 8px;
+  background: #23272f;
+}
+.h-96::-webkit-scrollbar-thumb {
+  background: #313543;
+  border-radius: 8px;
+}
+
+.space-y-2 > * + * {
+  margin-top: 0.5rem;
+}
+
+.space-y-3 > * + * {
+  margin-top: 0.75rem;
+}
+
+.outline-none {
+  outline: none;
+}
+
+input[type="text"] {
+  width: 100%;
+  color: var(--text-white);
+  background: var(--bg-input);
+  border: 1.5px solid var(--border-gray);
+  border-radius: 0.5rem;
+  padding: 0.85rem 1rem;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  transition: border 0.2s, background 0.2s;
+  box-sizing: border-box;
+}
+input[type="text"]:focus {
+  outline: none;
+  border-color: var(--border-focus);
+  background: var(--bg-input-focus);
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0.85rem 1rem;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+  box-shadow: 0 2px 8px 0 rgba(0,0,0,0.18);
+  color: var(--text-white);
+  margin-bottom: 0.25rem;
+}
+
+.w-full.md\:w-64 {
+  width: 100%;
+  max-width: 100%;
+  background: var(--bg-darker);
+  border: 1px solid var(--border-gray);
+  box-shadow: var(--shadow-dark);
+}
+
+/* Add styles for user ready status */
+.user-status {
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.user-status.ready {
+  background: linear-gradient(90deg, #16a34a 60%, #15803d 100%);
+  color: white;
+}
+
+.user-status.not-ready {
+  background: linear-gradient(90deg, #d97706 60%, #b45309 100%);
+  color: white;
+}
+
+/* Update user list item styles */
+ul.space-y-2 > li {
+  background: var(--bg-darkest);
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  color: var(--text-white);
+  border: 1px solid var(--border-gray);
+  transition: all 0.2s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+ul.space-y-2 > li:hover {
+  background: var(--bg-input-focus);
+  transform: translateX(4px);
+}
+
+ul.space-y-2 > li span:first-child {
+  font-weight: 500;
+}
+
+.text-yellow-600 {
+  color: var(--text-yellow);
+}
+.text-yellow-600:hover {
+  color: var(--text-yellow-dark);
+}
+
+.text-green-600 {
+  color: var(--text-green);
+}
+.text-green-600:hover {
+  color: var(--text-green-dark);
+}
+
+/* Remove default button outline on click */
+button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--border-focus);
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+  .flex-row {
+    flex-direction: column;
+  }
+  .w-full.md\:w-64 {
+    width: 100%;
+    margin-top: 1.5rem;
+  }
+}
