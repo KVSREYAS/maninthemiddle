@@ -1,4 +1,3 @@
-
 import eventlet
 
 eventlet.monkey_patch()
@@ -9,7 +8,10 @@ from medieval_converter import convert_func
 import random
 import os
 from dotenv import load_dotenv
+from clue_generator import generate_clue
 load_dotenv()
+
+
 app=Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 
@@ -58,10 +60,19 @@ def user_ready():
             for user in rooms[roomid]["connected_users"]:
                 if user not in rooms[roomid]["user_roles"]:
                     if user==catcher:
-                        rooms[roomid]["user_roles"][user]="Catcher"
+                        rooms[roomid]["user_roles"][user]="catcher"
                     else:
-                        rooms[roomid]["user_roles"][user]="Normal"
+                        rooms[roomid]["user_roles"][user]="normal"
             rooms[roomid]["role_assigned"]=True
+        print(rooms[roomid]["user_roles"])
+        
+        question=generate_clue()
+        rooms[roomid]["answer"]=question['answer']
+        rooms[roomid]["question"]=question["question"]
+        rooms[roomid]["clues"]=question["clues"]
+        
+        
+        
         emit('all_users_ready',broadcast=True)
     
         
@@ -71,6 +82,12 @@ def assign_roles():
     print(rooms)
     roomid=usertoroom[request.sid]
     socketio.emit("role_recieve",rooms[roomid]["user_roles"][request.sid],to=request.sid)
+    socketio.emit('q_recieve',rooms[roomid]["question"])
+    socketio.emit("clue_recieve",rooms[roomid]["clues"])
+    
+    # Send answer only to the catcher
+    if rooms[roomid]["user_roles"][request.sid] == "catcher":
+        socketio.emit("answer_recieve", rooms[roomid]["answer"], to=request.sid)
 
 @socketio.on('testing')
 def testing(string):
@@ -100,7 +117,7 @@ def connect_msg(username,roomid):
         usertoroom[request.sid]=roomid
         socketio.emit("valid_room_id",True,to=request.sid)
     else:
-        socketio.emit("valid_room_id",False)
+        socketio.emit("valid_room_id",False,to=request.sid)
     
 @socketio.on('disconnect')
 def handle_disconnect():
@@ -120,7 +137,37 @@ def handle_message(msg,username):
     print('Message recieved',msg)
     msg=convert_func(msg)
     string=username+" : "+msg
+    self_string="You: " + msg
     send(string,broadcast=True,include_self=False)
+    send(self_string,to=request.sid)
+
+@socketio.on('submit_answer')
+def handle_answer(answer, username):
+    roomid = usertoroom[request.sid]
+    print(f'Answer submitted by {username}: {answer}')
+    print(f'Correct answer is: {rooms[roomid]["answer"]}')
+    
+    # Check if the answer is correct
+    is_correct = answer.lower().strip() == rooms[roomid]["answer"].lower().strip()
+    print(f'Is answer correct? {is_correct}')
+    
+    # Send the result to all players
+    socketio.emit('answer_result', {
+        'username': username,
+        'is_correct': is_correct,
+        'answer': answer
+    })
+    
+    if is_correct:
+        # If correct, end the game
+        print("Correct answer! Emitting game_over event")
+        print(f"Winner: {username}, Correct Answer: {rooms[roomid]['answer']}")
+        # Emit to all clients in the room
+        socketio.emit('game_over', {
+            'winner': username,
+            'correct_answer': rooms[roomid]["answer"]
+        })
+        print("Game over event emitted to room:", roomid)
 
 if __name__=='__main__':
     print("hwelloo")
