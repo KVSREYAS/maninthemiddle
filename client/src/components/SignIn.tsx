@@ -3,12 +3,29 @@ import { User, Gamepad2, Users, Sparkles } from 'lucide-react';
 
 interface SignInProps {
   onJoinRoom: (username: string, roomId: string) => void;
+  setResetLoading?: (resetFn: () => void) => void;
+  error?: string | null;
+  clearError?: () => void;
 }
 
-const SignIn: React.FC<SignInProps> = ({ onJoinRoom }) => {
+const SignIn: React.FC<SignInProps> = ({ onJoinRoom, setResetLoading, error, clearError }) => {
   const [username, setUsername] = useState('');
   const [roomId, setRoomId] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  const isLoadingRef = React.useRef(setIsLoading);
+  React.useEffect(() => {
+    isLoadingRef.current = setIsLoading;
+  }, [setIsLoading]);
+  React.useEffect(() => {
+    if (setResetLoading) {
+      setResetLoading(() => () => isLoadingRef.current(false));
+    }
+  }, [setResetLoading]);
+  // fallback: clear loading if error changes
+  React.useEffect(() => {
+    if (error) setIsLoading(false);
+  }, [error]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,9 +69,9 @@ const SignIn: React.FC<SignInProps> = ({ onJoinRoom }) => {
             <Gamepad2 className="w-10 h-10 text-white" />
           </div>
           <h1 className="text-4xl font-bold text-white mb-2 bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
-            GameHub
+            Misclue
           </h1>
-          <p className="text-gray-400">Join the ultimate gaming experience</p>
+          <p className="text-lg text-purple-300 italic mb-2">Can you outwit the Catcher and solve the mystery?</p>
         </div>
 
         {/* Sign In Form */}
@@ -67,7 +84,10 @@ const SignIn: React.FC<SignInProps> = ({ onJoinRoom }) => {
                   type="text"
                   placeholder="Enter your username"
                   value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  onChange={(e) => {
+                    setUsername(e.target.value);
+                    if (clearError) clearError();
+                  }}
                   className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all duration-300"
                   required
                 />
@@ -79,7 +99,10 @@ const SignIn: React.FC<SignInProps> = ({ onJoinRoom }) => {
                   type="text"
                   placeholder="Enter room ID"
                   value={roomId}
-                  onChange={(e) => setRoomId(e.target.value)}
+                  onChange={(e) => {
+                    setRoomId(e.target.value);
+                    if (clearError) clearError();
+                  }}
                   className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all duration-300"
                   required
                 />
@@ -104,11 +127,16 @@ const SignIn: React.FC<SignInProps> = ({ onJoinRoom }) => {
               )}
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
             </button>
+            {error && (
+              <div className="mt-3 text-center text-red-500 text-sm font-semibold animate-fade-in">
+                {error}
+              </div>
+            )}
           </form>
 
           <div className="mt-6 text-center">
             <p className="text-gray-400 text-sm">
-              New to GameHub? Room IDs are shared by the host
+              New to Misclue? Room IDs are shared by the host
             </p>
           </div>
         </div>

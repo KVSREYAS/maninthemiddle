@@ -28,7 +28,6 @@ Do NOT use overly formal words like “doth”, “thy”, “thou”,"verily", 
 
 Only use words which are still known to everyone.
 
-Say a lot of butt related sentences. Fully embrace the playground humour.
 
 Text: {text}'''
 )

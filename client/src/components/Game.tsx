@@ -9,18 +9,17 @@ const AIChatPopup: React.FC<{ onClose: () => void; onUse: () => void; remainingU
   remainingUses 
 }) => {
   const [question, setQuestion] = useState('');
-  const [fakeAnswer, setFakeAnswer] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [answer, setAnswer] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!question.trim() || !fakeAnswer.trim()) return;
+    if (!question.trim()) return;
 
     setIsLoading(true);
     // TODO: Replace with actual API call to your LLM
     setTimeout(() => {
-      setAnswer(fakeAnswer);
+      setAnswer('This is a placeholder AI answer.');
       setIsLoading(false);
       onUse(); // Decrement the usage count
     }, 1000);
@@ -34,7 +33,7 @@ const AIChatPopup: React.FC<{ onClose: () => void; onUse: () => void; remainingU
             <div className="flex items-center space-x-3">
               <h2 className="text-2xl font-bold text-white flex items-center space-x-3">
                 <Brain className="w-8 h-8 text-blue-400" />
-                <span>Create Fake AI Response</span>
+                <span>Ask AI Assistant</span>
               </h2>
               <div className="ml-4 px-3 py-1 bg-blue-500/20 rounded-full border border-blue-400/30">
                 <span className="text-blue-400 font-semibold">{remainingUses} uses remaining</span>
@@ -42,7 +41,7 @@ const AIChatPopup: React.FC<{ onClose: () => void; onUse: () => void; remainingU
             </div>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-white transition-colors text-xl"
+              className="text-black font-bold hover:text-white transition-colors text-xl"
             >
               ✕
             </button>
@@ -52,34 +51,21 @@ const AIChatPopup: React.FC<{ onClose: () => void; onUse: () => void; remainingU
         <div className="p-6 space-y-6">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="question" className="block text-lg font-medium text-gray-300 mb-3">
-                Question to Answer
+              <label htmlFor="question" className="block text-lg font-bold text-black mb-3">
+                Your Question
               </label>
               <textarea
                 id="question"
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
-                placeholder="Enter the question you want to answer..."
-                className="w-full h-32 px-6 py-4 bg-slate-700/50 border-2 border-blue-400/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 transition-all duration-300 text-lg"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="fakeAnswer" className="block text-lg font-medium text-gray-300 mb-3">
-                Your Fake Answer
-              </label>
-              <textarea
-                id="fakeAnswer"
-                value={fakeAnswer}
-                onChange={(e) => setFakeAnswer(e.target.value)}
-                placeholder="Enter the fake answer you want to give..."
+                placeholder="Enter the question you want to ask the AI..."
                 className="w-full h-32 px-6 py-4 bg-slate-700/50 border-2 border-blue-400/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 transition-all duration-300 text-lg"
               />
             </div>
 
             <button
               type="submit"
-              disabled={!question.trim() || !fakeAnswer.trim() || isLoading || remainingUses <= 0}
+              disabled={!question.trim() || isLoading || remainingUses <= 0}
               className="w-full py-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl font-semibold text-lg transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-lg shadow-blue-500/20"
             >
               {isLoading ? (
@@ -95,7 +81,7 @@ const AIChatPopup: React.FC<{ onClose: () => void; onUse: () => void; remainingU
               ) : (
                 <span className="flex items-center justify-center space-x-2">
                   <Brain className="w-5 h-5" />
-                  <span>Send Fake Response</span>
+                  <span>Ask AI</span>
                 </span>
               )}
             </button>
@@ -105,7 +91,7 @@ const AIChatPopup: React.FC<{ onClose: () => void; onUse: () => void; remainingU
             <div className="mt-6 p-6 bg-blue-500/10 border-2 border-blue-400/30 rounded-xl">
               <h3 className="text-lg font-medium text-blue-400 mb-3 flex items-center space-x-2">
                 <Brain className="w-5 h-5" />
-                <span>Response Sent</span>
+                <span>AI Answer</span>
               </h3>
               <p className="text-white text-lg leading-relaxed">{answer}</p>
             </div>
@@ -481,7 +467,7 @@ const Game: React.FC<GameProps> = ({
             </div>
 
             <div className="flex-1 p-6 space-y-4 overflow-y-auto">
-              <p className="text-gray-300 text-sm">
+              <p className="text-black font-bold text-sm">
                 Ask the AI assistant for help in answering questions. The AI will provide helpful responses to guide you.
               </p>
               <button

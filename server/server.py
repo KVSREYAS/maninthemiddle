@@ -99,25 +99,23 @@ def handle_connect():
     print("client connected")
     
 @socketio.on('connect_msg')
-def connect_msg(username,roomid):
-    print(roomid)
+def connect_msg(username, roomid):
+    try:
+        roomid_int = int(roomid)
+    except (ValueError, TypeError):
+        socketio.emit("valid_room_id", False, to=request.sid)
+        return
+    if roomid_int not in rooms:
+        create_room(roomid_int)
+    # Add user to the room
+    rooms[roomid_int]["connected_users"][request.sid] = username
+    rooms[roomid_int]["user_status"][request.sid] = False
     print(rooms)
-    print(request.sid)
-    roomid=int(roomid)
-    if int(roomid) in rooms:
-        # rooms[roomid]={}
-        # connected_users[request.sid]=username
-        rooms[roomid]["connected_users"][request.sid]=username
-        # user_status[request.sid]=False
-        rooms[roomid]["user_status"][request.sid]=False
-        print(rooms)
-        string=username+" has arrived"
-        send(string,broadcast=True,include_self=False)
-        broadcast_all_users(roomid)
-        usertoroom[request.sid]=roomid
-        socketio.emit("valid_room_id",True,to=request.sid)
-    else:
-        socketio.emit("valid_room_id",False,to=request.sid)
+    string = username + " has arrived"
+    send(string, broadcast=True, include_self=False)
+    broadcast_all_users(roomid_int)
+    usertoroom[request.sid] = roomid_int
+    socketio.emit("valid_room_id", True, to=request.sid)
     
 @socketio.on('disconnect')
 def handle_disconnect():
