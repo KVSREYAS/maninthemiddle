@@ -3,9 +3,10 @@ import { Send, MessageCircle, Eye, Target, Shield, Users, Timer, Bot, Brain } fr
 import { User, ChatMessage, GameProps } from '../types';
 
 // AI Chat Popup Component for Survivor
-const AIChatPopup: React.FC<{ onClose: () => void; onUse: () => void; remainingUses: number }> = ({ 
+const AIChatPopup: React.FC<{ onClose: () => void; onUse: () => void; remainingUses: number; handleAnswerQuestion: (question: string) => void }> = ({ 
   onClose, 
   onUse,
+  handleAnswerQuestion,
   remainingUses 
 }) => {
   const [question, setQuestion] = useState('');
@@ -18,6 +19,8 @@ const AIChatPopup: React.FC<{ onClose: () => void; onUse: () => void; remainingU
 
     setIsLoading(true);
     // TODO: Replace with actual API call to your LLM
+    handleAnswerQuestion(question);
+    onClose();
     setTimeout(() => {
       setAnswer('This is a placeholder AI answer.');
       setIsLoading(false);
@@ -252,6 +255,36 @@ const GameOverPopup: React.FC<{
   );
 };
 
+// 1. Add CluesPopup component (copy/adapt from CatcherGame)
+const CluesPopup: React.FC<{ onClose: () => void; clues: string[] }> = ({ onClose, clues }) => (
+  <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
+    <div className="bg-slate-800 rounded-2xl border border-blue-400/50 shadow-lg shadow-blue-500/20 w-full max-w-md mx-4 animate-scale-in">
+      <div className="p-6 border-b border-blue-400/20 flex items-center justify-between">
+        <h2 className="text-xl font-bold text-white flex items-center space-x-3">
+          <span>Clues</span>
+        </h2>
+        <button
+          onClick={onClose}
+          className="text-gray-400 hover:text-white transition-colors text-xl"
+        >
+          ✕
+        </button>
+      </div>
+      <div className="p-6 space-y-4">
+        {clues.length === 0 ? (
+          <div className="text-gray-300">No clues available.</div>
+        ) : (
+          clues.map((clue, idx) => (
+            <div key={idx} className="text-white text-lg">
+              <span className="text-blue-400 font-semibold">Clue {idx + 1}:</span> {clue}
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  </div>
+);
+
 const Game: React.FC<GameProps> = ({
   user,
   roomId,
@@ -274,6 +307,8 @@ const Game: React.FC<GameProps> = ({
   const [answerResult, setAnswerResult] = useState<{ isCorrect: boolean; message: string } | null>(null);
   const [showGameOver, setShowGameOver] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
+  // 2. Add showCluesPopup state
+  const [showCluesPopup, setShowCluesPopup] = useState(false);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -309,6 +344,10 @@ const Game: React.FC<GameProps> = ({
     if (!message.trim()) return;
     onSendMessage(message.trim());
     setMessage('');
+  };
+
+  const handleAnswerQuestion = (question: string) => {
+    socket.emit('answer_question', question);
   };
 
   const formatTime = (seconds: number) => {
@@ -373,19 +412,22 @@ const Game: React.FC<GameProps> = ({
           </div>
         </div>
 
-        {/* Question and Clues Section */}
-        <div className="mb-8 text-center animate-role-reveal">
-          <div className="inline-flex items-center space-x-4 px-8 py-6 rounded-2xl border-2 bg-blue-500/20 border-blue-400/50 shadow-lg shadow-blue-500/20 backdrop-blur-lg">
-            <div>
-              <h2 className="text-3xl font-bold text-blue-400 mb-4">{question}</h2>
-              <div className="space-y-4">
-                {clues.map((clue, index) => (
-                  <div key={index} className="text-white text-lg">
-                    <span className="text-blue-400 font-semibold">Clue {index + 1}:</span> {clue}
-                  </div>
-                ))}
-              </div>
+        {/* Question, Clues, and Role Display */}
+        <div className="mb-6 flex flex-col items-center animate-role-reveal">
+          {/* Show Clues button should always be right of the guess card */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
+            {/* Guess the Thing Card */}
+            <div className="flex-1 max-w-3xl min-w-[300px] sm:min-w-[400px] md:min-w-[600px] px-10 py-4 rounded-2xl border-2 bg-blue-500/20 border-blue-400/50 shadow-lg shadow-blue-500/20 backdrop-blur-lg flex flex-col items-center justify-center" style={{ minHeight: '80px' }}>
+              <h2 className="text-2xl font-bold text-blue-400 mb-2 text-center">{question}</h2>
             </div>
+            {/* Show Clues Button */}
+            <button
+              className="px-8 py-5 bg-blue-500/30 border border-blue-400/50 rounded-xl text-white font-bold text-lg hover:bg-blue-500/50 transition-all duration-200 min-w-[160px]"
+              style={{ height: '4.5rem' }}
+              onClick={() => setShowCluesPopup(true)}
+            >
+              Show Clues
+            </button>
           </div>
         </div>
 
@@ -566,6 +608,7 @@ const Game: React.FC<GameProps> = ({
           onClose={() => setShowAIChat(false)} 
           onUse={handleAiResponseUse}
           remainingUses={aiResponseUses}
+          handleAnswerQuestion={handleAnswerQuestion}
         />
       )}
 
@@ -589,6 +632,9 @@ const Game: React.FC<GameProps> = ({
           data={gameOverData}
           currentUsername={user.username}
         />
+      )}
+      {showCluesPopup && (
+        <CluesPopup onClose={() => setShowCluesPopup(false)} clues={clues} />
       )}
     </div>
   );

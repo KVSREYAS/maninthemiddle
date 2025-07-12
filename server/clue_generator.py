@@ -3,59 +3,106 @@ from dotenv import load_dotenv
 import os
 import random
 import json
+from langchain.prompts import PromptTemplate
+from langchain.chains import LLMChain
 # Initialize the Groq LLM
 load_dotenv()
 # api_key=os.getenv("GROQ_API_KEY")
 llm = ChatGroq(
     model_name="llama-3.3-70b-versatile" # or "llama3-70b-8192", "mixtral-8x7b-32768", etc.
 )
-type = random.choice(["person", "place", "invention", "mythical creature", "event", "feeling", "tool"])
+
 # Define the prompt as a string
-prompt = f'''You are the Game Master in a multiplayer deduction game called "Guess the Thing". Your task is to generate an interesting {type} and provide two challenging but solvable clues.
 
-Role: Game Master
-Task: Generate an interesting {type} and two challenging clues
+json_format = '''{\n  "question": "Guess the type",\n  "clues": [\n    "<general context clue>",\n    "<more specific but still challenging clue>"\n  ],\n  "answer": "<the exact correct answer>"\n}'''
 
-Requirements:
-- Choose an interesting {type} that's not immediately obvious but can be figured out
-- Create two clues that are challenging but not impossible to solve
-- First clue should be more general, giving a broad category or context
-- Second clue should be more specific but still require some deduction
-- Clues should be interesting enough to spark follow-up questions
-- The answer should be something that can be discovered through logical questioning
-- Avoid making it too easy or too hard - aim for a 3-5 question solve
-- Response must be in valid JSON format with no extra text or formatting
-- Do not include any explanations or additional text outside the JSON structure
+prompt = PromptTemplate(
+    template=(
+        """You are the Game Master in a multiplayer deduction game called \"Guess the Thing\". Your task is to generate an interesting {type} and provide two challenging but solvable clues.\n\n"
+        "Role: Game Master\n"
+        "Task: Generate an interesting {type} and two challenging clues\n\n"
+        "Requirements:\n"
+        "- Choose an interesting {type} that's not immediately obvious but can be figured out\n"
+        "- Create two clues that are challenging but not impossible to solve\n"
+        "- First clue should be more general, giving a broad category or context\n"
+        "- Second clue should be more specific but still require some deduction\n"
+        "- Clues should be interesting enough to spark follow-up questions\n"
+        "- The answer should be something that can be discovered through logical questioning\n"
+        "- Avoid making it too easy or too hard - aim for a 3-5 question solve\n"
+        "- Response must be in valid JSON format with no extra text or formatting\n"
+        "- Do not include any explanations or additional text outside the JSON structure\n"
+        "Response Format (respond with ONLY this JSON structure, no other text):\n"
+        f"{json_format}" """
+    ),
+    input_variables=["type", "json_format"]
+)
 
-Response Format (respond with ONLY this JSON structure, no other text):
-{{
-  "question": "Guess the {type}",
-  "clues": [
-    "<general context clue>",
-    "<more specific but still challenging clue>"
-  ],
-  "answer": "<the exact correct answer>"
-}}'''
 
 def generate_clue():
+    type_choice = random.choice(["person", "place", "invention", "mythical creature", "event", "feeling", "tool"])
+    chain = LLMChain(
+        llm=llm,
+        prompt=prompt,
+        output_key="game"
+    )
+    response = chain.invoke({"type": type_choice, "json_format": json_format})
+    # The response may be a dict with 'game' as a string containing JSON
+    game_json = response.get("game", "")
     try:
-        # Run the chain with the prompt
-        response = llm.invoke(prompt)
-        # Try to parse the JSON response
-        return json.loads(response.content)
+        result = json.loads(game_json)
     except json.JSONDecodeError as e:
         print(f"Error parsing JSON response: {e}")
-        print("Raw response:", response.content)
+        print("Raw response:", game_json)
         # Return a default response in case of error
-        return {
-            "question": f"Guess the {type}",
+        result = {
+            "question": f"Guess the {type_choice}",
             "clues": [
                 "Error generating clues. Please try again.",
                 "The system encountered an issue."
             ],
             "answer": "Error"
         }
+    return result
+
+def answer_question(answer, question):
+    json_format=''' '''
+    answer_prompt=PromptTemplate(
+        template=f'''You are a strict Game Master.
+                    The user gives you two inputs:
+
+                    an object (a description of a thing, person, place, or concept)
+
+                    a question (a yes/no question about the object)
+
+                    Your task is to say whether the question fits the typical characteristics of the object.
+
+                    If the object clearly implies the answer is "yes", answer yes.
+                    If the object clearly implies the answer is "no", answer no.
+                    If the object does not provide enough information to answer definitively, answer "unknown".
+
+                    You must always respond in valid, strict JSON format, and nothing else.
+                    The JSON must have exactly one key-value pair:
+
+                    key: "answer"
+
+                    value: one of the strings "yes", "no", or "unknown"
+
+                    Do not include any text outside the JSON. Do not explain your reasoning. Do not add any comments.
+                    
+                    Object: {answer}
+                    Question: {question}
+                    Response Format (respond with ONLY this JSON structure, no other text or formatting):
+                    {json_format}''',
+        input_variables=["answer", "question", "json_format"]
+    )
+    chain = LLMChain(
+        llm=llm,
+        prompt=answer_prompt,
+        output_key="game"
+    )
+    response = chain.invoke({"answer": answer, "question": question, "json_format": json_format})
+    return json.loads(response["game"])["answer"]
 
 if __name__ == "__main__":
-    result = generate_clue()
+    result = answer_question("A detective", "Does the person usually wear a hat?")
     print(result)

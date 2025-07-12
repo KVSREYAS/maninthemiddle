@@ -72,6 +72,9 @@ const Lobby: React.FC<LobbyProps> = ({
                   {readyCount}/{users.length} ready
                 </div>
               </div>
+              <div className="mt-4 text-center text-cyan-300 text-sm font-semibold">
+                You need at least 3 players to play with an impostor.<br/>Otherwise, you can enjoy a regular game!
+              </div>
             </div>
 
             <div className="p-4 space-y-3 max-h-96 overflow-y-auto">

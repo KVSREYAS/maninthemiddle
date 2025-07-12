@@ -8,7 +8,7 @@ from medieval_converter import convert_func
 import random
 import os
 from dotenv import load_dotenv
-from clue_generator import generate_clue
+from clue_generator import generate_clue,answer_question
 load_dotenv()
 
 
@@ -55,7 +55,10 @@ def user_ready():
     broadcast_all_users(roomid)
     if all(rooms[roomid]["user_status"].values()):
         print("All users are ready")
-        catcher=random.choice(list(rooms[roomid]["connected_users"].keys()))
+        if len(rooms[roomid]["connected_users"])>2:
+            catcher=random.choice(list(rooms[roomid]["connected_users"].keys()))
+        else:
+            catcher=-1
         if not rooms[roomid]["role_assigned"]:
             for user in rooms[roomid]["connected_users"]:
                 if user not in rooms[roomid]["user_roles"]:
@@ -166,6 +169,27 @@ def handle_answer(answer, username):
             'correct_answer': rooms[roomid]["answer"]
         })
         print("Game over event emitted to room:", roomid)
+
+
+@socketio.on("answer_question")
+def answer_ques(question):
+    roomid=usertoroom[request.sid]
+    print("recieved question",question)
+    ans=answer_question(rooms[roomid]["answer"],question)
+    username=rooms[roomid]["connected_users"][request.sid]
+    question_string=username+" : "+question
+    ans="AI: "+ans
+    send(question_string,broadcast=True)
+    send(ans,broadcast=True)
+
+@socketio.on("handle_fake_answer")
+def handle_fake_answer(question,answer):
+    roomid=usertoroom[request.sid]
+    username=rooms[roomid]["connected_users"][request.sid]
+    question_string=username+" : "+question
+    ans="AI: "+answer
+    send(question_string,broadcast=True)
+    send(ans,broadcast=True)
 
 if __name__=='__main__':
     print("hwelloo")

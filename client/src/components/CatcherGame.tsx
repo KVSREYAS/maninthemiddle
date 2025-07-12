@@ -3,10 +3,11 @@ import { Send, MessageCircle, Eye, Target, Shield, Users, Timer, Brain } from 'l
 import { User, ChatMessage, CatcherGameProps } from '../types';
 
 // AI Chat Popup Component for Catcher
-const AIChatPopup: React.FC<{ onClose: () => void; onUse: () => void; remainingUses: number }> = ({ 
+const AIChatPopup: React.FC<{ onClose: () => void; onUse: () => void; remainingUses: number ,handle_fake_answer:(question:string,answer:string)=>void}> = ({ 
   onClose, 
   onUse,
-  remainingUses 
+  remainingUses,
+  handle_fake_answer 
 }) => {
   const [question, setQuestion] = useState('');
   const [fakeAnswer, setFakeAnswer] = useState('');
@@ -18,6 +19,9 @@ const AIChatPopup: React.FC<{ onClose: () => void; onUse: () => void; remainingU
     if (!question.trim() || !fakeAnswer.trim()) return;
 
     setIsLoading(true);
+    handle_fake_answer(question,fakeAnswer);
+    onClose(); // Close the popup immediately after submitting
+
     // TODO: Replace with actual API call to your LLM
     setTimeout(() => {
       setAnswer(fakeAnswer);
@@ -258,6 +262,8 @@ const CatcherGame: React.FC<CatcherGameProps> = ({
     slow: 3
   });
 
+  const [showCluesPopup, setShowCluesPopup] = useState(false);
+
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMessages]);
@@ -292,6 +298,10 @@ const CatcherGame: React.FC<CatcherGameProps> = ({
     if (!message.trim()) return;
     onSendMessage(message.trim());
     setMessage('');
+  };
+
+  const handlefakeresp=(question:string,answer:string)=>{
+      socket.emit("handle_fake_answer",question,answer)
   };
 
   const formatTime = (seconds: number) => {
@@ -365,27 +375,57 @@ const CatcherGame: React.FC<CatcherGameProps> = ({
     );
   };
 
+  // Clues Popup Component
+  const CluesPopup: React.FC<{ onClose: () => void; clues: string[] }> = ({ onClose, clues }) => (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
+      <div className="bg-slate-800 rounded-2xl border border-red-400/50 shadow-lg shadow-red-500/20 w-full max-w-md mx-4 animate-scale-in">
+        <div className="p-6 border-b border-red-400/20 flex items-center justify-between">
+          <h2 className="text-xl font-bold text-white flex items-center space-x-3">
+            <span>Clues</span>
+          </h2>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-white transition-colors text-xl"
+          >
+            ✕
+          </button>
+        </div>
+        <div className="p-6 space-y-4">
+          {clues.length === 0 ? (
+            <div className="text-gray-300">No clues available.</div>
+          ) : (
+            clues.map((clue, idx) => (
+              <div key={idx} className="text-white text-lg">
+                <span className="text-red-400 font-semibold">Clue {idx + 1}:</span> {clue}
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-red-900/20 to-slate-900 p-4 relative overflow-hidden">
+    <div className="min-h-[80vh] bg-gradient-to-br from-slate-900 via-red-900/20 to-slate-900 p-3 relative overflow-hidden">
       {/* Dynamic background */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-red-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/3 left-1/3 w-80 h-80 bg-orange-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/4 right-1/4 w-80 h-80 bg-red-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/3 left-1/3 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto">
         {/* Game Header */}
-        <div className="text-center mb-8 animate-fade-in">
-          <div className="inline-flex items-center space-x-6 bg-white/10 backdrop-blur-lg rounded-2xl px-8 py-4 border border-white/20">
+        <div className="text-center mb-6 animate-fade-in">
+          <div className="inline-flex items-center space-x-6 bg-white/10 backdrop-blur-lg rounded-2xl px-8 py-3 border border-white/20">
             <div className="flex items-center space-x-2">
               <Timer className="w-5 h-5 text-red-400" />
               <span className="text-xl font-bold text-white">{formatTime(gameTime)}</span>
             </div>
-            <div className="h-6 w-px bg-white/20"></div>
+            <div className="h-5 w-px bg-white/20"></div>
             <div className="flex items-center space-x-2 text-sm text-gray-300">
               <span>Room: {roomId}</span>
             </div>
-            <div className="h-6 w-px bg-white/20"></div>
+            <div className="h-5 w-px bg-white/20"></div>
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-1 text-red-400">
                 <Target className="w-4 h-4" />
@@ -400,39 +440,44 @@ const CatcherGame: React.FC<CatcherGameProps> = ({
         </div>
 
         {/* Question, Clues, and Role Display */}
-        <div className="mb-8 text-center animate-role-reveal">
-          <div className="inline-flex items-center space-x-4 px-8 py-6 rounded-2xl border-2 bg-red-500/20 border-red-400/50 shadow-lg shadow-red-500/20 backdrop-blur-lg">
-            <div>
-              <h2 className="text-3xl font-bold text-red-400 mb-4">{question}</h2>
-              <div className="space-y-4">
-                {clues.map((clue, index) => (
-                  <div key={index} className="text-white text-lg">
-                    <span className="text-red-400 font-semibold">Clue {index + 1}:</span> {clue}
-                  </div>
-                ))}
-                <div className="mt-6 p-4 bg-red-500/30 rounded-xl border-2 border-red-400/50">
+        <div className="mb-6 flex flex-col items-center animate-role-reveal">
+          {/* Show Clues button should always be right of the guess card */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
+            {/* Guess the Thing Card */}
+            <div className="flex-1 max-w-3xl min-w-[300px] sm:min-w-[400px] md:min-w-[600px] px-10 py-4 rounded-2xl border-2 bg-red-500/20 border-red-400/50 shadow-lg shadow-red-500/20 backdrop-blur-lg flex flex-col items-center justify-center" style={{ minHeight: '80px' }}>
+              <h2 className="text-2xl font-bold text-red-400 mb-2 text-center">{question}</h2>
+              <div className="w-full flex flex-col items-center">
+                <div className="mt-2 p-2 bg-red-500/30 rounded-xl border-2 border-red-400/50 w-full text-center">
                   <span className="text-red-400 font-semibold">Answer:</span> {answer}
                 </div>
               </div>
             </div>
+            {/* Show Clues Button */}
+            <button
+              className="px-8 py-5 bg-red-500/30 border border-red-400/50 rounded-xl text-white font-bold text-lg hover:bg-red-500/50 transition-all duration-200 min-w-[160px]"
+              style={{ height: '4.5rem' }}
+              onClick={() => setShowCluesPopup(true)}
+            >
+              Show Clues
+            </button>
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-6">
+        <div className="grid lg:grid-cols-3 gap-4">
           {/* Players Status */}
           <div className="lg:col-span-1 bg-white/10 backdrop-blur-lg rounded-2xl border border-white/20 animate-slide-left h-[calc(100vh-16rem)] flex flex-col">
-            <div className="p-6 border-b border-white/20">
+            <div className="p-4 border-b border-white/20">
               <h2 className="text-xl font-bold text-white flex items-center space-x-2">
                 <Users className="w-5 h-5 text-red-400" />
                 <span>Players</span>
               </h2>
             </div>
 
-            <div className="flex-1 p-4 space-y-3 overflow-y-auto">
+            <div className="flex-1 p-3 space-y-2 overflow-y-auto">
               {users.map((u, index) => (
                 <div
                   key={u.id}
-                  className={`p-4 rounded-xl border transition-all duration-300 ${
+                  className={`p-3 rounded-xl border transition-all duration-300 ${
                     u.id === user.id
                       ? 'bg-red-500/20 border-red-400/50 shadow-lg shadow-red-500/10'
                       : u.role === 'catcher'
@@ -442,7 +487,7 @@ const CatcherGame: React.FC<CatcherGameProps> = ({
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold relative ${
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold relative ${
                         u.role === 'catcher' ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'
                       }`}>
                         {u.username.charAt(0).toUpperCase()}
@@ -471,10 +516,10 @@ const CatcherGame: React.FC<CatcherGameProps> = ({
               ))}
             </div>
 
-            <div className="p-4 border-t border-white/20">
+            <div className="p-3 border-t border-white/20">
               <button
                 onClick={onLeaveGame}
-                className="w-full py-3 bg-gray-600 hover:bg-gray-500 text-white rounded-xl font-semibold transition-all duration-300 hover:scale-105"
+                className="w-full py-2 bg-gray-600 hover:bg-gray-500 text-white rounded-xl font-semibold transition-all duration-300 hover:scale-105"
               >
                 Leave Game
               </button>
@@ -483,26 +528,26 @@ const CatcherGame: React.FC<CatcherGameProps> = ({
 
           {/* AI Assistant Section */}
           <div className="lg:col-span-1 bg-white/10 backdrop-blur-lg rounded-2xl border border-red-400/50 shadow-lg shadow-red-500/20 animate-slide-left h-[calc(100vh-16rem)] flex flex-col">
-            <div className="p-6 border-b border-red-400/20">
+            <div className="p-4 border-b border-red-400/20">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold text-white flex items-center space-x-2">
                   <Brain className="w-6 h-6 text-red-400" />
                   <span>AI Response Creator</span>
                 </h2>
-                <div className="px-3 py-1 bg-red-500/20 rounded-full border border-red-400/30">
+                <div className="px-2 py-1 bg-red-500/20 rounded-full border border-red-400/30">
                   <span className="text-red-400 font-semibold">{aiResponseUses} uses remaining</span>
                 </div>
               </div>
             </div>
 
-            <div className="flex-1 p-6 space-y-4 overflow-y-auto">
+            <div className="flex-1 p-4 space-y-3 overflow-y-auto">
               <p className="text-gray-300 text-sm">
                 Create fake AI responses to deceive other players. Enter a question and craft a misleading answer to trick the survivors.
               </p>
               <button
                 onClick={() => setShowAIChat(true)}
                 disabled={aiResponseUses <= 0}
-                className={`w-full py-4 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl font-semibold transition-all duration-300 hover:scale-105 flex items-center justify-center space-x-3 shadow-lg shadow-red-500/20 ${
+                className={`w-full py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl font-semibold transition-all duration-300 hover:scale-105 flex items-center justify-center space-x-3 shadow-lg shadow-red-500/20 ${
                   aiResponseUses <= 0 ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
               >
@@ -513,7 +558,7 @@ const CatcherGame: React.FC<CatcherGameProps> = ({
               <button
                 onClick={() => setShowSubmitAnswer(true)}
                 disabled={hasSubmittedAnswer}
-                className={`w-full py-4 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl font-semibold transition-all duration-300 hover:scale-105 flex items-center justify-center space-x-3 shadow-lg shadow-red-500/20 ${
+                className={`w-full py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl font-semibold transition-all duration-300 hover:scale-105 flex items-center justify-center space-x-3 shadow-lg shadow-red-500/20 ${
                   hasSubmittedAnswer ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
               >
@@ -522,23 +567,23 @@ const CatcherGame: React.FC<CatcherGameProps> = ({
               </button>
 
               {/* Power-ups Section */}
-              <div className="mt-6 space-y-4">
+              <div className="mt-4 space-y-3">
                 <h3 className="text-lg font-semibold text-red-400">Power-ups</h3>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-3">
                   <div className="relative">
                     <button 
                       onClick={() => handlePowerUpClick('track')}
                       disabled={powerUps.track === 0}
-                      className={`w-full p-4 bg-red-500/20 border-2 border-red-400/50 rounded-xl hover:bg-red-500/30 transition-all duration-300 hover:scale-105 shadow-lg shadow-red-500/20 backdrop-blur-lg group ${
+                      className={`w-full p-3 bg-red-500/20 border-2 border-red-400/50 rounded-xl hover:bg-red-500/30 transition-all duration-300 hover:scale-105 shadow-lg shadow-red-500/20 backdrop-blur-lg group ${
                         powerUps.track === 0 ? 'opacity-50 cursor-not-allowed' : ''
                       }`}
                     >
                       <div className="flex flex-col items-center justify-center">
                         <Target className="w-6 h-6 text-red-400 group-hover:scale-110 transition-transform" />
-                        <span className="text-sm text-red-400 mt-2">Track</span>
+                        <span className="text-sm text-red-400 mt-1">Track</span>
                       </div>
                     </button>
-                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white text-sm font-bold border-2 border-white">
+                    <div className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-white text-xs font-bold border-2 border-white">
                       {powerUps.track}
                     </div>
                   </div>
@@ -547,16 +592,16 @@ const CatcherGame: React.FC<CatcherGameProps> = ({
                     <button 
                       onClick={() => handlePowerUpClick('scan')}
                       disabled={powerUps.scan === 0}
-                      className={`w-full p-4 bg-red-500/20 border-2 border-red-400/50 rounded-xl hover:bg-red-500/30 transition-all duration-300 hover:scale-105 shadow-lg shadow-red-500/20 backdrop-blur-lg group ${
+                      className={`w-full p-3 bg-red-500/20 border-2 border-red-400/50 rounded-xl hover:bg-red-500/30 transition-all duration-300 hover:scale-105 shadow-lg shadow-red-500/20 backdrop-blur-lg group ${
                         powerUps.scan === 0 ? 'opacity-50 cursor-not-allowed' : ''
                       }`}
                     >
                       <div className="flex flex-col items-center justify-center">
                         <Eye className="w-6 h-6 text-red-400 group-hover:scale-110 transition-transform" />
-                        <span className="text-sm text-red-400 mt-2">Scan</span>
+                        <span className="text-sm text-red-400 mt-1">Scan</span>
                       </div>
                     </button>
-                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white text-sm font-bold border-2 border-white">
+                    <div className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-white text-xs font-bold border-2 border-white">
                       {powerUps.scan}
                     </div>
                   </div>
@@ -565,16 +610,16 @@ const CatcherGame: React.FC<CatcherGameProps> = ({
                     <button 
                       onClick={() => handlePowerUpClick('shield')}
                       disabled={powerUps.shield === 0}
-                      className={`w-full p-4 bg-red-500/20 border-2 border-red-400/50 rounded-xl hover:bg-red-500/30 transition-all duration-300 hover:scale-105 shadow-lg shadow-red-500/20 backdrop-blur-lg group ${
+                      className={`w-full p-3 bg-red-500/20 border-2 border-red-400/50 rounded-xl hover:bg-red-500/30 transition-all duration-300 hover:scale-105 shadow-lg shadow-red-500/20 backdrop-blur-lg group ${
                         powerUps.shield === 0 ? 'opacity-50 cursor-not-allowed' : ''
                       }`}
                     >
                       <div className="flex flex-col items-center justify-center">
                         <Shield className="w-6 h-6 text-red-400 group-hover:scale-110 transition-transform" />
-                        <span className="text-sm text-red-400 mt-2">Shield</span>
+                        <span className="text-sm text-red-400 mt-1">Shield</span>
                       </div>
                     </button>
-                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white text-sm font-bold border-2 border-white">
+                    <div className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-white text-xs font-bold border-2 border-white">
                       {powerUps.shield}
                     </div>
                   </div>
@@ -583,16 +628,16 @@ const CatcherGame: React.FC<CatcherGameProps> = ({
                     <button 
                       onClick={() => handlePowerUpClick('slow')}
                       disabled={powerUps.slow === 0}
-                      className={`w-full p-4 bg-red-500/20 border-2 border-red-400/50 rounded-xl hover:bg-red-500/30 transition-all duration-300 hover:scale-105 shadow-lg shadow-red-500/20 backdrop-blur-lg group ${
+                      className={`w-full p-3 bg-red-500/20 border-2 border-red-400/50 rounded-xl hover:bg-red-500/30 transition-all duration-300 hover:scale-105 shadow-lg shadow-red-500/20 backdrop-blur-lg group ${
                         powerUps.slow === 0 ? 'opacity-50 cursor-not-allowed' : ''
                       }`}
                     >
                       <div className="flex flex-col items-center justify-center">
                         <Timer className="w-6 h-6 text-red-400 group-hover:scale-110 transition-transform" />
-                        <span className="text-sm text-red-400 mt-2">Slow</span>
+                        <span className="text-sm text-red-400 mt-1">Slow</span>
                       </div>
                     </button>
-                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white text-sm font-bold border-2 border-white">
+                    <div className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-white text-xs font-bold border-2 border-white">
                       {powerUps.slow}
                     </div>
                   </div>
@@ -603,7 +648,7 @@ const CatcherGame: React.FC<CatcherGameProps> = ({
 
           {/* Game Chat */}
           <div className="lg:col-span-1 bg-white/10 backdrop-blur-lg rounded-2xl border border-white/20 flex flex-col animate-slide-right h-[calc(100vh-16rem)]">
-            <div className="p-6 border-b border-white/20">
+            <div className="p-4 border-b border-white/20">
               <h2 className="text-xl font-bold text-white flex items-center space-x-2">
                 <MessageCircle className="w-5 h-5 text-red-400" />
                 <span>Game Chat</span>
@@ -611,10 +656,10 @@ const CatcherGame: React.FC<CatcherGameProps> = ({
             </div>
 
             {/* Messages */}
-            <div className="flex-1 p-4 overflow-y-auto space-y-3">
+            <div className="flex-1 p-3 overflow-y-auto space-y-2">
               {chatMessages.length === 0 ? (
-                <div className="text-center text-gray-400 py-8">
-                  <MessageCircle className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <div className="text-center text-gray-400 py-6">
+                  <MessageCircle className="w-12 h-12 mx-auto mb-3 opacity-50" />
                   <p>Game chat is empty. Communicate with other players!</p>
                 </div>
               ) : (
@@ -623,7 +668,7 @@ const CatcherGame: React.FC<CatcherGameProps> = ({
                   return (
                     <div
                       key={msg.id}
-                      className={`p-3 rounded-xl max-w-xs ${
+                      className={`p-2 rounded-xl max-w-xs ${
                         msg.username === user.username
                           ? 'bg-red-500/20 border border-red-400/30 ml-auto'
                           : msgUser?.role === 'catcher'
@@ -646,19 +691,19 @@ const CatcherGame: React.FC<CatcherGameProps> = ({
             </div>
 
             {/* Message Input */}
-            <div className="p-4 border-t border-white/20">
+            <div className="p-3 border-t border-white/20">
               <form onSubmit={handleSendMessage} className="flex space-x-3">
                 <input
                   type="text"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder="Send a message to all players..."
-                  className="flex-1 px-4 py-3 bg-white/5 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-400/20 transition-all duration-300"
+                  className="flex-1 px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-400/20 transition-all duration-300"
                 />
                 <button
                   type="submit"
                   disabled={!message.trim()}
-                  className="px-6 py-3 bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-300 shadow-lg shadow-red-500/25"
+                  className="px-5 py-2 bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-300 shadow-lg shadow-red-500/25"
                 >
                   <Send className="w-5 h-5" />
                 </button>
@@ -673,6 +718,7 @@ const CatcherGame: React.FC<CatcherGameProps> = ({
           onClose={() => setShowAIChat(false)} 
           onUse={handleAiResponseUse}
           remainingUses={aiResponseUses}
+          handle_fake_answer={handlefakeresp}
         />
       )}
 
@@ -696,6 +742,10 @@ const CatcherGame: React.FC<CatcherGameProps> = ({
           data={gameOverData}
           currentUsername={user.username}
         />
+      )}
+
+      {showCluesPopup && (
+        <CluesPopup onClose={() => setShowCluesPopup(false)} clues={clues} />
       )}
     </div>
   );

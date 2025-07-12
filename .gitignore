@@ -29,3 +29,5 @@ yarn-error.log*
 *.swo
 
 .venv/
+server/myenv/
+__pycache__/

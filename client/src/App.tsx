@@ -8,8 +8,8 @@ import CatcherGame from './components/CatcherGame';
 import type { GamePage, User, GameRoom, ChatMessage } from './types';
 import { Target } from 'lucide-react';
 
-const SERVER_URL = "https://maninthemiddle-production.up.railway.app";
-// const SERVER_URL = "http://localhost:3000";
+// const SERVER_URL = "https://maninthemiddle-production.up.railway.app";
+const SERVER_URL = "http://localhost:3000";
 
 const App: React.FC = () => {
   const [socket, setSocket] = useState<typeof Socket | null>(null);
@@ -214,7 +214,7 @@ const App: React.FC = () => {
     return (
       <Lobby
         user={currentUser}
-        roomId={currentUser.id}
+        roomId={roomId}
         users={users.map(u => ({
           id: u.name,
           username: u.name,
@@ -237,7 +237,7 @@ const App: React.FC = () => {
     return (
       <Game
         user={currentUser}
-        roomId={currentUser.id}
+        roomId={roomId}
         users={users.map(u => ({
           id: u.name,
           username: u.name,
@@ -263,7 +263,7 @@ const App: React.FC = () => {
     return (
       <CatcherGame
         user={currentUser}
-        roomId={currentUser.id}
+        roomId={roomId}
         users={users.map(u => ({
           id: u.name,
           username: u.name,
