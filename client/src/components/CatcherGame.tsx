@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, MessageCircle, Eye, Target, Shield, Users, Timer, Brain } from 'lucide-react';
+import { Send, MessageCircle, Eye, Target, Shield, Users, Timer, Brain, Info } from 'lucide-react';
 import { User, ChatMessage, CatcherGameProps } from '../types';
 
 // AI Chat Popup Component for Catcher
@@ -263,6 +263,7 @@ const CatcherGame: React.FC<CatcherGameProps> = ({
   });
 
   const [showCluesPopup, setShowCluesPopup] = useState(false);
+  const [showInstructions, setShowInstructions] = useState(true);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -292,6 +293,49 @@ const CatcherGame: React.FC<CatcherGameProps> = ({
       socket.off('answer_result');
     };
   }, [user.username, socket]);
+  const clientSentat=useRef<number>(0);
+  useEffect(()=>{
+    console.log('page opened')
+    clientSentat.current=Date.now()
+    socket.emit('start_timer_request');
+  
+  },[]);
+
+  const start_timer=(duration:number)=>{
+    var duration_in_secs=Math.floor(duration/1000);
+    setInterval(()=>{
+      setGameTime(duration_in_secs);
+      duration_in_secs=duration_in_secs-1;
+    },1000)
+  }
+  
+  useEffect(()=>{
+    socket.on('start_timer',(data:{startTime:number,duration:number,serverTime:number})=>{
+      console.log('server_time_recieved');
+      console.log(data.serverTime);
+      console.log(data.startTime);
+      const client_recieved_at=Date.now();
+      console.log("client recieved at"+client_recieved_at);
+      console.log("Client sent at"+clientSentat.current);
+      const latency=(client_recieved_at-clientSentat.current)/2;
+      console.log("Latency"+latency);
+  
+      const server_time_now=data.serverTime+latency;
+      console.log(server_time_now);
+      if(server_time_now>data.startTime){
+        const delay=server_time_now-data.startTime;
+        setTimeout(()=>{
+          console.log(data.duration);
+          start_timer(data.duration);
+        },delay)
+      }
+      else{
+        const time_elapsed=server_time_now-data.serverTime
+        console.log(data.duration-time_elapsed);
+        start_timer(data.duration-time_elapsed);
+      }
+    });
+  },[socket])
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
@@ -436,6 +480,13 @@ const CatcherGame: React.FC<CatcherGameProps> = ({
                 <span>{normalCount} Players</span>
               </div>
             </div>
+            <button
+              className="ml-4 px-3 py-1 bg-cyan-500/20 rounded-full border border-cyan-400/30 flex items-center space-x-2 text-cyan-300 hover:bg-cyan-500/40 transition-all duration-200"
+              onClick={() => setShowInstructions(true)}
+            >
+              <Info className="w-4 h-4" />
+              <span>Instructions</span>
+            </button>
           </div>
         </div>
 
@@ -746,6 +797,32 @@ const CatcherGame: React.FC<CatcherGameProps> = ({
 
       {showCluesPopup && (
         <CluesPopup onClose={() => setShowCluesPopup(false)} clues={clues} />
+      )}
+
+      {/* Instructions Popup */}
+      {showInstructions && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
+          <div className="bg-slate-800 rounded-2xl border border-cyan-400/50 shadow-lg shadow-cyan-500/20 w-full max-w-2xl mx-4 animate-scale-in">
+            <div className="p-6 border-b border-cyan-400/20 flex items-center justify-between">
+              <h2 className="text-xl font-bold text-cyan-300 flex items-center space-x-2">
+                <Info className="w-5 h-5" />
+                <span>Game Instructions</span>
+              </h2>
+              <button onClick={() => setShowInstructions(false)} className="text-gray-400 hover:text-white transition-colors text-xl">✕</button>
+            </div>
+            <div className="p-6 space-y-4 text-white text-lg">
+              <p><span className="text-cyan-400 font-semibold">Goal:</span> Survive as a normal player or deceive as the Catcher (impostor)!</p>
+              <ul className="list-disc pl-6 space-y-2">
+                <li>At least 3 players are needed for an impostor to be present.</li>
+                <li>One player is randomly assigned as the Catcher (impostor), others are Survivors.</li>
+                <li>Survivors must answer questions and use clues to guess the correct answer.</li>
+                <li>The Catcher can create fake AI responses to mislead Survivors.</li>
+                <li>Use chat and power-ups to communicate and strategize.</li>
+                <li>If a Survivor guesses the answer, Survivors win. If the Catcher deceives everyone, the Catcher wins.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

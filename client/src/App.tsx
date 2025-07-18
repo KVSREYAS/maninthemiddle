@@ -8,8 +8,8 @@ import CatcherGame from './components/CatcherGame';
 import type { GamePage, User, GameRoom, ChatMessage } from './types';
 import { Target } from 'lucide-react';
 
-const SERVER_URL = "https://maninthemiddle-production.up.railway.app";
-// const SERVER_URL = "http://localhost:3000";
+// const SERVER_URL = "https://maninthemiddle-production.up.railway.app";
+const SERVER_URL = "http://localhost:3000";
 
 const App: React.FC = () => {
   const [socket, setSocket] = useState<typeof Socket | null>(null);

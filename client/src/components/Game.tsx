@@ -1,6 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, MessageCircle, Eye, Target, Shield, Users, Timer, Bot, Brain } from 'lucide-react';
+import { Send, MessageCircle, Eye, Target, Shield, Users, Timer, Bot, Brain, Info } from 'lucide-react';
 import { User, ChatMessage, GameProps } from '../types';
+
+declare global{
+  interface Window{
+    serverClockOffset:number;
+  }
+}
 
 // AI Chat Popup Component for Survivor
 const AIChatPopup: React.FC<{ onClose: () => void; onUse: () => void; remainingUses: number; handleAnswerQuestion: (question: string) => void }> = ({ 
@@ -105,7 +111,7 @@ const AIChatPopup: React.FC<{ onClose: () => void; onUse: () => void; remainingU
   );
 };
 
-// Submit Answer Popup Component
+// Submit Answer Popup Componentserv
 const SubmitAnswerPopup: React.FC<{ onClose: () => void; onSubmit: (answer: string) => void }> = ({
   onClose,
   onSubmit
@@ -309,19 +315,119 @@ const Game: React.FC<GameProps> = ({
   const chatEndRef = useRef<HTMLDivElement>(null);
   // 2. Add showCluesPopup state
   const [showCluesPopup, setShowCluesPopup] = useState(false);
+  const [showInstructions, setShowInstructions] = useState(true);
+  const [serverStartTime, setServerStartTime] = useState<number | null>(null);
+  const [serverDuration, setServerDuration] = useState<number>(300000); // default 5 min
+  const [serverTimeOffset, setServerTimeOffset] = useState<number>(0); // ms
+  const [localTargetSeconds, setLocalTargetSeconds] = useState<number>(300);
+  const timerIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // const [client_sentat,setClientsentat]=useState<number>(0);
+  const clientSentat=useRef<number>(0);
+
+  // // Helper to get now in server time
+  // function nowServer() {
+  //   return Date.now() + serverTimeOffset;
+  // }
+
+  // // Sync server time offset
+  // function syncClock(serverTime: number) {
+  //   const clientNow = Date.now();
+  //   setServerTimeOffset(serverTime - clientNow);
+  // }
+
+  // // Handle timer events from server
+  // useEffect(() => {
+  //   function handleTimerEvent(data: { startTime: number; duration: number; serverTime: number }) {
+  //     syncClock(data.serverTime);
+  //     setServerStartTime(data.startTime);
+  //     setServerDuration(data.duration);
+  //     // Calculate initial seconds left
+  //     const now = Date.now() + (data.serverTime - Date.now());
+  //     const elapsed = now - data.startTime;
+  //     const remaining = Math.max(0, data.duration - elapsed);
+  //     setLocalTargetSeconds(Math.ceil(remaining / 1000));
+  //   }
+  //   socket.on('start_timer', handleTimerEvent);
+  //   socket.on('timer_correction', handleTimerEvent);
+  //   return () => {
+  //     socket.off('start_timer', handleTimerEvent);
+  //     socket.off('timer_correction', handleTimerEvent);
+  //   };
+  // }, [socket]);
+
+  // // Local ticking and smooth correction
+  // useEffect(() => {
+  //   if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+  //   timerIntervalRef.current = setInterval(() => {
+  //     if (serverStartTime == null) return;
+  //     const now = nowServer();
+  //     const elapsed = now - serverStartTime;
+  //     const remaining = Math.max(0, serverDuration - elapsed);
+  //     const seconds = Math.ceil(remaining / 1000);
+  //     // Smooth correction: lerp if off by >1s
+  //     setGameTime(prev => {
+  //       if (Math.abs(seconds - prev) > 1) {
+  //         // Lerp toward correct value
+  //         return Math.round(prev + (seconds - prev) * 0.3);
+  //       }
+  //       return seconds;
+  //     });
+  //     if (remaining <= 0) {
+  //       if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+  //       onLeaveGame();
+  //     }
+  //   }, 1000);
+  //   return () => {
+  //     if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+  //   };
+  // }, [serverStartTime, serverDuration, serverTimeOffset, onLeaveGame]);
+
+const start_timer=(duration:number)=>{
+  var duration_in_secs=Math.floor(duration/1000);
+  setInterval(()=>{
+    setGameTime(duration_in_secs);
+    duration_in_secs=duration_in_secs-1;
+  },1000)
+}
+
+useEffect(()=>{
+  console.log('page opened')
+  clientSentat.current=Date.now()
+  socket.emit('start_timer_request');
+
+},[]);
+
+useEffect(()=>{
+  socket.on('start_timer',(data:{startTime:number,duration:number,serverTime:number})=>{
+    console.log('server_time_recieved');
+    console.log(data.serverTime);
+    console.log(data.startTime);
+    const client_recieved_at=Date.now();
+    console.log("client recieved at"+client_recieved_at);
+    console.log("Client sent at"+clientSentat.current);
+    const latency=(client_recieved_at-clientSentat.current)/2;
+    console.log("Latency"+latency);
+
+    const server_time_now=data.serverTime+latency;
+    console.log(server_time_now);
+    if(server_time_now>data.startTime){
+      const delay=server_time_now-data.startTime;
+      setTimeout(()=>{
+        console.log(data.duration);
+        start_timer(data.duration);
+      },delay)
+    }
+    else{
+      const time_elapsed=server_time_now-data.serverTime
+      console.log(data.duration-time_elapsed);
+      start_timer(data.duration-time_elapsed);
+    }
+  });
+},[socket])
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMessages]);
-
-  useEffect(() => {
-    console.log(user)
-    const timer = setInterval(() => {
-      setGameTime(prev => Math.max(0, prev - 1));
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
 
   useEffect(() => {
     socket.on('answer_result', (data: { username: string; is_correct: boolean; answer: string }) => {
@@ -388,8 +494,8 @@ const Game: React.FC<GameProps> = ({
 
       <div className="relative z-10 max-w-7xl mx-auto">
         {/* Game Header */}
-        <div className="text-center mb-8 animate-fade-in">
-          <div className="inline-flex items-center space-x-6 bg-white/10 backdrop-blur-lg rounded-2xl px-8 py-4 border border-white/20">
+        <div className="text-center mb-6 animate-fade-in">
+          <div className="inline-flex items-center space-x-6 bg-white/10 backdrop-blur-lg rounded-2xl px-8 py-3 border border-white/20">
             <div className="flex items-center space-x-2">
               <Timer className="w-5 h-5 text-cyan-400" />
               <span className="text-xl font-bold text-white">{formatTime(gameTime)}</span>
@@ -409,6 +515,13 @@ const Game: React.FC<GameProps> = ({
                 <span>{normalCount} Players</span>
               </div>
             </div>
+            <button
+              className="ml-4 px-3 py-1 bg-cyan-500/20 rounded-full border border-cyan-400/30 flex items-center space-x-2 text-cyan-300 hover:bg-cyan-500/40 transition-all duration-200"
+              onClick={() => setShowInstructions(true)}
+            >
+              <Info className="w-4 h-4" />
+              <span>Instructions</span>
+            </button>
           </div>
         </div>
 
@@ -635,6 +748,30 @@ const Game: React.FC<GameProps> = ({
       )}
       {showCluesPopup && (
         <CluesPopup onClose={() => setShowCluesPopup(false)} clues={clues} />
+      )}
+      {/* Instructions Popup */}
+      {showInstructions && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
+          <div className="bg-slate-800 rounded-2xl border border-cyan-400/50 shadow-lg shadow-cyan-500/20 w-full max-w-2xl mx-4 animate-scale-in">
+            <div className="p-6 border-b border-cyan-400/20 flex items-center justify-between">
+              <h2 className="text-xl font-bold text-cyan-300 flex items-center space-x-2">
+                <Info className="w-5 h-5" />
+                <span>Game Instructions</span>
+              </h2>
+              <button onClick={() => setShowInstructions(false)} className="text-gray-400 hover:text-white transition-colors text-xl">✕</button>
+            </div>
+            <div className="p-6 space-y-4 text-white text-lg">
+              <p><span className="text-cyan-400 font-semibold">Goal:</span>You are a player. Discuss with your peers and get the answer</p>
+              <ul className="list-disc pl-6 space-y-2">
+              <li>🎯 <strong>One Shot, One Answer:</strong> Each player has only <em>one chance</em> to submit their final answer. Use it wisely!</li>
+              <li>❓ <strong>Interrogate the Master:</strong> Each of you may ask the Master up to <em>2 yes/no questions</em> to uncover the truth.</li>
+              <li>🕵️‍♂️ <strong>Beware the Impostor:</strong> Among you hides an impostor, skilled at deception — they can even <em>pretend to be the Master</em> and give up to <strong>two fake responses</strong> to mislead you.</li>
+              <li>🔥 <strong>Trust No One:</strong> In this game, nothing and no one is what they seem. Stay sharp…</li>
+
+              </ul>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

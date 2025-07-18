@@ -9,6 +9,8 @@ import random
 import os
 from dotenv import load_dotenv
 from clue_generator import generate_clue,answer_question
+import time
+import threading
 load_dotenv()
 
 
@@ -31,15 +33,29 @@ def create_room(roomid):
     rooms[roomid]["user_status"]={}
     rooms[roomid]["user_roles"]={}
     rooms[roomid]["role_assigned"]=False
- 
-create_room(1)
-create_room(2)   
+    # rooms[roomid]["timer"] = {"start_time": None, "duration": None}
+  
 
 def broadcast_all_users(roomid):
     user_list = [{"name": username, "ready": rooms[roomid]["user_status"][sid]} 
                  for sid, username in rooms[roomid]["connected_users"].items()]
     print(user_list)
     socketio.emit('user_list', user_list)
+
+# def periodic_timer_corrections():
+#     while True:
+#         for roomid, room in rooms.items():
+#             timer = room.get("timer", {})
+#             if timer.get("start_time") and timer.get("duration"):
+#                 socketio.emit('timer_correction', {
+#                     'startTime': timer["start_time"],
+#                     'duration': timer["duration"],
+#                     'serverTime': int(time.time() * 1000)
+#                 }, room=roomid)
+#         time.sleep(2)
+
+# correction_thread = threading.Thread(target=periodic_timer_corrections, daemon=True)
+# correction_thread.start()
 
 @app.route('/')
 def index():
@@ -100,7 +116,17 @@ def testing(string):
 @socketio.on('connect')
 def handle_connect():
     print("client connected")
-    
+    # # Find the room for this sid if possible
+    # for roomid, room in rooms.items():
+    #     if request.sid in room["connected_users"]:
+    #         timer = room.get("timer", {})
+    #         if timer.get("start_time") and timer.get("duration"):
+    #             socketio.emit('timer_correction', {
+    #                 'startTime': timer["start_time"],
+    #                 'duration': timer["duration"],
+    #                 'serverTime': int(time.time() * 1000)
+    #             }, to=request.sid)
+
 @socketio.on('connect_msg')
 def connect_msg(username, roomid):
     try:
@@ -131,6 +157,10 @@ def handle_disconnect():
     rooms[user_room_id]["role_assigned"]=False
     broadcast_all_users(user_room_id)
     send(f"{username} has left",broadcast=True)
+    if len(rooms[user_room_id]["connected_users"])==0:
+        print(user_room_id)
+        rooms.pop(user_room_id,None)
+        print(rooms)
     print(rooms)
     
 @socketio.on('send_message')
@@ -190,6 +220,39 @@ def handle_fake_answer(question,answer):
     ans="AI: "+answer
     send(question_string,broadcast=True)
     send(ans,broadcast=True)
+
+
+@socketio.on('sync_time')
+def handle_sync_time(client_sent_at):
+    print("Recieved sync request")
+    server_time = int(time.time() * 1000)  # milliseconds
+    socketio.emit('sync_time_response', {
+        'clientSentAt': client_sent_at,
+        'serverTime': server_time
+    })
+
+@socketio.on("start_timer_request")
+def start_timer():
+    roomid = usertoroom[request.sid]
+    print(time.time())
+    print(rooms)
+    if "timer" not in rooms[roomid]:
+        start_time = int(time.time() * 1000) + 2000  # 2s delay for sync
+        duration = 300000  # 5 minutes in ms
+        rooms[roomid]["timer"] = {"start_time": start_time, "duration": duration}
+        print('timer_req_recieved')
+        print(type(start_time))
+    else:
+        start_time=rooms[roomid]["timer"]["start_time"]
+        duration=rooms[roomid]["timer"]["duration"]
+    socketio.emit('start_timer', {
+        'startTime': start_time,
+        'duration': duration,
+        'serverTime': int(time.time() * 1000)
+    }, to=request.sid)
+
+
+
 
 if __name__=='__main__':
     print("hwelloo")
