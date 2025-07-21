@@ -26,6 +26,7 @@ user_status={}
 user_roles={}
 first_time=True
 usertoroom={}
+next_avail_room=1
 
 def create_room(roomid):
     rooms[roomid]={}
@@ -61,6 +62,16 @@ def broadcast_all_users(roomid):
 def index():
     return "Flask SocketIO server running"
 
+
+
+@socketio.on('request_new_room')
+def room_creation():
+    global next_avail_room
+    print(next_avail_room)
+    create_room(next_avail_room)
+    socketio.emit('new_room_id',next_avail_room,to=request.sid)
+    next_avail_room+=1
+    
 
 
 
@@ -135,7 +146,7 @@ def connect_msg(username, roomid):
         socketio.emit("valid_room_id", False, to=request.sid)
         return
     if roomid_int not in rooms:
-        create_room(roomid_int)
+        socketio.emit("valid_room_id",False,to=request.sid)
     # Add user to the room
     rooms[roomid_int]["connected_users"][request.sid] = username
     rooms[roomid_int]["user_status"][request.sid] = False
@@ -145,7 +156,17 @@ def connect_msg(username, roomid):
     broadcast_all_users(roomid_int)
     usertoroom[request.sid] = roomid_int
     socketio.emit("valid_room_id", True, to=request.sid)
-    
+
+@socketio.on('request_new_room')
+def room_creation(username):
+    global next_avail_room
+    print(next_avail_room)
+    create_room(next_avail_room)
+    socketio.emit('new_room_id',next_avail_room,to=request.sid)
+    connect_msg(username,next_avail_room)
+    next_avail_room+=1
+
+
 @socketio.on('disconnect')
 def handle_disconnect():
     user_room_id=usertoroom[request.sid]

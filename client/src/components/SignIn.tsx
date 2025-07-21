@@ -3,12 +3,14 @@ import { User, Gamepad2, Users, Sparkles } from 'lucide-react';
 
 interface SignInProps {
   onJoinRoom: (username: string, roomId: string) => void;
+  onCreateRoom?: (username: string) => void;
   setResetLoading?: (resetFn: () => void) => void;
   error?: string | null;
   clearError?: () => void;
+  creatingRoom?: boolean;
 }
 
-const SignIn: React.FC<SignInProps> = ({ onJoinRoom, setResetLoading, error, clearError }) => {
+const SignIn: React.FC<SignInProps> = ({ onJoinRoom, onCreateRoom, setResetLoading, error, clearError, creatingRoom }) => {
   const [username, setUsername] = useState('');
   const [roomId, setRoomId] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -35,6 +37,13 @@ const SignIn: React.FC<SignInProps> = ({ onJoinRoom, setResetLoading, error, cle
     // Simulate loading
     await new Promise(resolve => setTimeout(resolve, 1500));
     onJoinRoom(username.trim(), roomId.trim());
+  };
+
+  const handleCreateRoom = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!username.trim() || !onCreateRoom) return;
+    console.log(username.trim());
+    onCreateRoom(username.trim());
   };
 
   return (
@@ -111,10 +120,10 @@ const SignIn: React.FC<SignInProps> = ({ onJoinRoom, setResetLoading, error, cle
 
             <button
               type="submit"
-              disabled={isLoading || !username.trim() || !roomId.trim()}
+              disabled={isLoading || creatingRoom || !username.trim() || !roomId.trim()}
               className="w-full bg-gradient-to-r from-cyan-500 to-purple-500 text-white py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-cyan-500/25 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-300 relative overflow-hidden group"
             >
-              {isLoading ? (
+              {(isLoading && !creatingRoom) ? (
                 <div className="flex items-center justify-center space-x-2">
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                   <span>Joining Room...</span>
@@ -123,6 +132,25 @@ const SignIn: React.FC<SignInProps> = ({ onJoinRoom, setResetLoading, error, cle
                 <div className="flex items-center justify-center space-x-2">
                   <Sparkles className="w-5 h-5" />
                   <span>Join Room</span>
+                </div>
+              )}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+            </button>
+            <button
+              type="button"
+              disabled={isLoading || creatingRoom || !username.trim()}
+              onClick={handleCreateRoom}
+              className="w-full mt-2 bg-gradient-to-r from-green-500 to-cyan-500 text-white py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-green-500/25 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-300 relative overflow-hidden group"
+            >
+              {creatingRoom ? (
+                <div className="flex items-center justify-center space-x-2">
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  <span>Creating Room...</span>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center space-x-2">
+                  <Sparkles className="w-5 h-5" />
+                  <span>Create New Room</span>
                 </div>
               )}
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
@@ -136,7 +164,7 @@ const SignIn: React.FC<SignInProps> = ({ onJoinRoom, setResetLoading, error, cle
 
           <div className="mt-6 text-center">
             <p className="text-gray-400 text-sm">
-              New to Misclue? Room IDs are shared by the host
+              New to Misclue? Room IDs are shared by the host or you can create a new room.
             </p>
           </div>
         </div>

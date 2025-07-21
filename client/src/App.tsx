@@ -6,7 +6,9 @@ import Lobby from './components/Lobby';
 import Game from './components/Game';
 import CatcherGame from './components/CatcherGame';
 import type { GamePage, User, GameRoom, ChatMessage } from './types';
-import { Target } from 'lucide-react';
+import { Home, Target } from 'lucide-react';
+import { Routes, Route, Navigate } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
 
 const SERVER_URL = "https://maninthemiddle-production.up.railway.app";
 // const SERVER_URL = "http://localhost:3000";
@@ -31,6 +33,8 @@ const App: React.FC = () => {
   const socketRef = useRef<typeof Socket | null>(null);
   const [signInResetLoading, setSignInResetLoading] = useState<(() => void) | null>(null);
   const [signInError, setSignInError] = useState<string | null>(null);
+  const navigate=useNavigate();
+  const [creatingRoom, setCreatingRoom] = useState(false);
 
   useEffect(() => {
     const newSocket = io(SERVER_URL, { transports: ["websocket"] });
@@ -50,11 +54,13 @@ const App: React.FC = () => {
     newSocket.on("user_list", (usersList: {name: string, ready: boolean}[]) => {
       setUsers(usersList);
     });
-
+    
     newSocket.on("all_users_ready", () => {
       newSocket.emit("assign_roles");
       setGameStarted(true);
       setCurrentPage('game');
+      console.log("hefefe")
+      navigate("/game");
     });
 
     newSocket.on("role_recieve", (role: string) => {
@@ -93,6 +99,7 @@ const App: React.FC = () => {
         if (signInResetLoading) signInResetLoading();
       }else{
         setSignInError(null);
+        navigate("/lobby");
         setCurrentPage('lobby');
       }
     });
@@ -102,6 +109,18 @@ const App: React.FC = () => {
       console.log("Game over data:", data);
       setGameOverData(data);
       setShowGameOver(true);
+    });
+
+    newSocket.on("new_room_id", (newroomid: number) => {
+      console.log(newroomid);
+      setRoomId(newroomid.toString());
+      setCreatingRoom(false);
+      setSignInError(null);
+      navigate("/lobby");
+      setCurrentPage('lobby');
+      // console.log(newRoomId);
+      // console.log(username);
+      // socket?.emit('connect_msg',username,newRoomId)
     });
 
     return () => {
@@ -128,6 +147,22 @@ const App: React.FC = () => {
     setRoomId(roomId);
 
     // setCurrentPage('lobby');
+  };
+
+  const handleCreateRoom = (username1: string) => {
+    if (!socket) return;
+    console.log("room created");
+    const newUser1: User = {
+      id: socket.id,
+      username,
+      isReady: false,
+    };
+    
+    setUsername(username1);
+    console.log(username)
+    setCreatingRoom(true);
+    setCurrentUser(newUser1);
+    socket.emit('request_new_room',username1);
   };
 
   const handleToggleReady = () => {
@@ -205,14 +240,97 @@ const App: React.FC = () => {
       </div>
     );
   };
-
+  
   if (currentPage === 'signin') {
-    return <SignIn onJoinRoom={handleJoinRoom} setResetLoading={setSignInResetLoading} error={signInError} clearError={() => setSignInError(null)} />;
+    return <SignIn onJoinRoom={handleJoinRoom} onCreateRoom={handleCreateRoom} setResetLoading={setSignInResetLoading} error={signInError} clearError={() => setSignInError(null)} creatingRoom={creatingRoom} />;
   }
 
-  if (currentPage === 'lobby' && currentUser) {
-    return (
-      <Lobby
+  // if (currentPage === 'lobby' && currentUser) {
+  //   return (
+  //     <Lobby
+  //       user={currentUser}
+  //       roomId={roomId}
+  //       users={users.map(u => ({
+  //         id: u.name,
+  //         username: u.name,
+  //         isReady: u.ready
+  //       }))}
+  //       chatMessages={messages.map((msg, index) => ({
+  //         id: index.toString(),
+  //         username: msg.split(':')[0] || 'System',
+  //         message: msg.split(':')[1] || msg,
+  //         timestamp: new Date()
+  //       }))}
+  //       onToggleReady={handleToggleReady}
+  //       onSendMessage={handleSendMessage}
+  //       onStartGame={assignRoles} // Handled by server
+  //     />
+  //   );
+  // }
+  
+  const NotFound = () => {
+    return <h1>404 - Page Not Found</h1>;
+  };
+
+
+  return (
+    <Routes>
+      {/* <Route
+      path='/catcher_game'
+      element={
+        
+      } */}
+
+      <Route
+        path="/game"
+        element={currentUser?.role=='normal'? <Game
+            user={currentUser}
+            roomId={roomId}
+            users={users.map(u => ({
+              id: u.name,
+              username: u.name,
+              isReady: u.ready
+            }))}
+            chatMessages={messages.map((msg, index) => ({
+              id: index.toString(),
+              username: msg.split(':')[0] || 'System',
+              message: msg.split(':')[1] || msg,
+              timestamp: new Date()
+            }))}
+            onSendMessage={handleSendMessage}
+            onLeaveGame={handleLeaveGame}
+            question={question}
+            clues={clues}
+            socket={socket!}
+            gameOverData={gameOverData}
+          />:      <CatcherGame
+          user={currentUser}
+          roomId={roomId}
+          users={users.map(u => ({
+            id: u.name,
+            username: u.name,
+            isReady: u.ready
+          }))}
+          chatMessages={messages.map((msg, index) => ({
+            id: index.toString(),
+            username: msg.split(':')[0] || 'System',
+            message: msg.split(':')[1] || msg,
+            timestamp: new Date()
+          }))}
+          onSendMessage={handleSendMessage}
+          onLeaveGame={handleLeaveGame}
+          question={question}
+          clues={clues}
+          answer={answer}
+          socket={socket!}
+          gameOverData={gameOverData}
+        />
+        }
+      />
+
+      <Route path="/" element={<NotFound/>} />
+
+      <Route path="/Lobby" element={<Lobby
         user={currentUser}
         roomId={roomId}
         users={users.map(u => ({
@@ -230,61 +348,64 @@ const App: React.FC = () => {
         onSendMessage={handleSendMessage}
         onStartGame={assignRoles} // Handled by server
       />
-    );
-  }
+      }
+      />
 
-  if (currentPage === 'game' && currentUser && currentUser.role=='normal') {
-    return (
-      <Game
-        user={currentUser}
-        roomId={roomId}
-        users={users.map(u => ({
-          id: u.name,
-          username: u.name,
-          isReady: u.ready
-        }))}
-        chatMessages={messages.map((msg, index) => ({
-          id: index.toString(),
-          username: msg.split(':')[0] || 'System',
-          message: msg.split(':')[1] || msg,
-          timestamp: new Date()
-        }))}
-        onSendMessage={handleSendMessage}
-        onLeaveGame={handleLeaveGame}
-        question={question}
-        clues={clues}
-        socket={socket!}
-        gameOverData={gameOverData}
-      />
-    );
-  }
+    </Routes>
+  );
   
-  if (currentPage === 'game' && currentUser && currentUser.role=='catcher'){
-    return (
-      <CatcherGame
-        user={currentUser}
-        roomId={roomId}
-        users={users.map(u => ({
-          id: u.name,
-          username: u.name,
-          isReady: u.ready
-        }))}
-        chatMessages={messages.map((msg, index) => ({
-          id: index.toString(),
-          username: msg.split(':')[0] || 'System',
-          message: msg.split(':')[1] || msg,
-          timestamp: new Date()
-        }))}
-        onSendMessage={handleSendMessage}
-        onLeaveGame={handleLeaveGame}
-        question={question}
-        clues={clues}
-        answer={answer}
-        socket={socket!}
-        gameOverData={gameOverData}
-      />
-    );
-  }
+//   if (currentPage === 'game' && currentUser && currentUser.role=='normal') {
+//     return (
+//       <Game
+//         user={currentUser}
+//         roomId={roomId}
+//         users={users.map(u => ({
+//           id: u.name,
+//           username: u.name,
+//           isReady: u.ready
+//         }))}
+//         chatMessages={messages.map((msg, index) => ({
+//           id: index.toString(),
+//           username: msg.split(':')[0] || 'System',
+//           message: msg.split(':')[1] || msg,
+//           timestamp: new Date()
+//         }))}
+//         onSendMessage={handleSendMessage}
+//         onLeaveGame={handleLeaveGame}
+//         question={question}
+//         clues={clues}
+//         socket={socket!}
+//         gameOverData={gameOverData}
+//       />
+//     );
+//   }
+  
+//   if (currentPage === 'game' && currentUser && currentUser.role=='catcher'){
+//     return (
+      // <CatcherGame
+      //   user={currentUser}
+      //   roomId={roomId}
+      //   users={users.map(u => ({
+      //     id: u.name,
+      //     username: u.name,
+      //     isReady: u.ready
+      //   }))}
+      //   chatMessages={messages.map((msg, index) => ({
+      //     id: index.toString(),
+      //     username: msg.split(':')[0] || 'System',
+      //     message: msg.split(':')[1] || msg,
+      //     timestamp: new Date()
+      //   }))}
+      //   onSendMessage={handleSendMessage}
+      //   onLeaveGame={handleLeaveGame}
+      //   question={question}
+      //   clues={clues}
+      //   answer={answer}
+      //   socket={socket!}
+      //   gameOverData={gameOverData}
+      // />
+//     );
+//   }
 
   return null;
 };
