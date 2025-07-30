@@ -10,8 +10,8 @@ import { Home, Target } from 'lucide-react';
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useNavigate } from 'react-router-dom';
 
-const SERVER_URL = "https://maninthemiddle-production.up.railway.app";
-// const SERVER_URL = "http://localhost:8000";
+// const SERVER_URL = "https://maninthemiddle-production.up.railway.app";
+const SERVER_URL = "http://localhost:8080";
 
 const App: React.FC = () => {
   const [socket, setSocket] = useState<typeof Socket | null>(null);
@@ -59,7 +59,7 @@ const App: React.FC = () => {
       newSocket.emit("assign_roles");
       setGameStarted(true);
       setCurrentPage('game');
-      console.log("hefefe")
+      console.log("Entering game page");
       navigate("/game");
     });
 
@@ -93,9 +93,10 @@ const App: React.FC = () => {
       setAnswer(a);
     });
 
-    newSocket.on("valid_room_id", (valid: boolean) => {
-      if (!valid) {
-        setSignInError("Invalid room id");
+    newSocket.on("valid_room_id", (obj:{success: boolean,message:string}) => {
+      console.log(obj);
+      if (!obj.success) {
+        setSignInError(obj.message);
         if (signInResetLoading) signInResetLoading();
       }else{
         setSignInError(null);

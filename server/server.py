@@ -11,13 +11,14 @@ from dotenv import load_dotenv
 from clue_generator import generate_clue,answer_question
 import time
 import threading
+from threading import Timer
 load_dotenv()
 
 
 app=Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 
-socketio=SocketIO(app,cors_allowed_origins="*")
+socketio=SocketIO(app,cors_allowed_origins="*",async_mode="eventlet")
 
 
 rooms={}
@@ -64,13 +65,13 @@ def index():
 
 
 
-@socketio.on('request_new_room')
-def room_creation():
-    global next_avail_room
-    print(next_avail_room)
-    create_room(next_avail_room)
-    socketio.emit('new_room_id',next_avail_room,to=request.sid)
-    next_avail_room+=1
+# @socketio.on('request_new_room')
+# def room_creation():
+#     global next_avail_room
+#     print(next_avail_room)
+#     create_room(next_avail_room)
+#     socketio.emit('new_room_id',next_avail_room,to=request.sid)
+#     next_avail_room+=1
     
 
 
@@ -102,8 +103,8 @@ def user_ready():
         rooms[roomid]["clues"]=question["clues"]
         
         
-        
-        emit('all_users_ready',broadcast=True)
+        for user in rooms[roomid]["connected_users"]:
+            emit('all_users_ready',to=user)
     
         
     
@@ -143,10 +144,15 @@ def connect_msg(username, roomid):
     try:
         roomid_int = int(roomid)
     except (ValueError, TypeError):
-        socketio.emit("valid_room_id", False, to=request.sid)
+        socketio.emit("valid_room_id",{"success":False,"message":"Invalid room id"},to=request.sid)
         return
     if roomid_int not in rooms:
-        socketio.emit("valid_room_id",False,to=request.sid)
+        socketio.emit("valid_room_id",{"success":False,"message":"Invalid room id"},to=request.sid)
+        return
+    print(rooms)
+    if rooms[roomid_int]["role_assigned"]:
+        socketio.emit("valid_room_id",{"success":False,"message":"Game has already started"},to=request.sid)
+        return
     # Add user to the room
     rooms[roomid_int]["connected_users"][request.sid] = username
     rooms[roomid_int]["user_status"][request.sid] = False
@@ -155,7 +161,7 @@ def connect_msg(username, roomid):
     send(string, broadcast=True, include_self=False)
     broadcast_all_users(roomid_int)
     usertoroom[request.sid] = roomid_int
-    socketio.emit("valid_room_id", True, to=request.sid)
+    socketio.emit("valid_room_id",{"success":True,"message":"Joined"}, to=request.sid)
 
 @socketio.on('request_new_room')
 def room_creation(username):
@@ -216,7 +222,7 @@ def handle_answer(answer, username):
         print(f"Winner: {username}, Correct Answer: {rooms[roomid]['answer']}")
         # Emit to all clients in the room
         socketio.emit('game_over', {
-            'winner': username,
+            'winner': "The Guessers",
             'correct_answer': rooms[roomid]["answer"]
         })
         print("Game over event emitted to room:", roomid)
@@ -243,6 +249,8 @@ def handle_fake_answer(question,answer):
     send(ans,broadcast=True)
 
 
+
+
 @socketio.on('sync_time')
 def handle_sync_time(client_sent_at):
     print("Recieved sync request")
@@ -252,6 +260,17 @@ def handle_sync_time(client_sent_at):
         'serverTime': server_time
     })
 
+
+def timer_end(room_id):
+    print(f"Timer ended for room: {room_id}")
+    # Handle timer end logic here
+    for user in rooms[room_id]["connected_users"]:
+        print(f"Emitting game_over to user: {user}")
+        socketio.emit('game_over', {
+            'winner': "The Catcher",
+            'correct_answer': rooms[room_id]["answer"]
+        }, to=user)
+
 @socketio.on("start_timer_request")
 def start_timer():
     roomid = usertoroom[request.sid]
@@ -259,8 +278,11 @@ def start_timer():
     print(rooms)
     if "timer" not in rooms[roomid]:
         start_time = int(time.time() * 1000) + 2000  # 2s delay for sync
-        duration = 300000  # 5 minutes in ms
+        duration = 300000 # 5 minutes in ms
         rooms[roomid]["timer"] = {"start_time": start_time, "duration": duration}
+        t=Timer(duration/1000, timer_end, args=[roomid])
+        t.start()
+        print("Timer started")
         print('timer_req_recieved')
         print(type(start_time))
     else:

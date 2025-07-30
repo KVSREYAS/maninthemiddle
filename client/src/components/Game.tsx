@@ -24,11 +24,11 @@ const AIChatPopup: React.FC<{ onClose: () => void; onUse: () => void; remainingU
     if (!question.trim()) return;
 
     setIsLoading(true);
-    // TODO: Replace with actual API call to your LLM
+
     handleAnswerQuestion(question);
     onClose();
     setTimeout(() => {
-      setAnswer('This is a placeholder AI answer.');
+      setAnswer('Dummy');
       setIsLoading(false);
       onUse(); // Decrement the usage count
     }, 1000);
@@ -390,6 +390,8 @@ const start_timer=(duration:number)=>{
   },1000)
 }
 
+
+
 useEffect(()=>{
   console.log('page opened')
   clientSentat.current=Date.now()
@@ -476,7 +478,7 @@ useEffect(()=>{
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900/20 to-slate-900 p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-black p-4 relative overflow-hidden">
       {/* Dynamic background based on role */}
       <div className="absolute inset-0 overflow-hidden">
         {user.role === 'catcher' ? (
@@ -622,7 +624,7 @@ useEffect(()=>{
             </div>
 
             <div className="flex-1 p-6 space-y-4 overflow-y-auto">
-              <p className="text-black font-bold text-sm">
+              <p className="text-slate-200 font-bold text-sm">
                 Ask the AI assistant for help in answering questions. The AI will provide helpful responses to guide you.
               </p>
               <button
