@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, Gamepad2, Users, Sparkles } from 'lucide-react';
+import { User, Gamepad2, Users, Sparkles,Handshake,Briefcase,FlaskConical,Puzzle } from 'lucide-react';
 
 interface SignInProps {
   onJoinRoom: (username: string, roomId: string) => void;
@@ -49,7 +49,7 @@ const SignIn: React.FC<SignInProps> = ({ onJoinRoom, onCreateRoom, setResetLoadi
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-black flex items-center justify-center p-4 relative overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
@@ -77,7 +77,7 @@ const SignIn: React.FC<SignInProps> = ({ onJoinRoom, onCreateRoom, setResetLoadi
         {/* Logo/Title */}
         <div className="text-center mb-8 animate-fade-in">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-2xl mb-4 shadow-lg shadow-cyan-500/25">
-            <Gamepad2 className="w-10 h-10 text-white" />
+            <Puzzle className="w-10 h-10 text-white" />
           </div>
           <h1 className="text-4xl font-bold text-white mb-2 bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
             Misclue
@@ -132,7 +132,7 @@ const SignIn: React.FC<SignInProps> = ({ onJoinRoom, onCreateRoom, setResetLoadi
                 </div>
               ) : (
                 <div className="flex items-center justify-center space-x-2">
-                  <Sparkles className="w-5 h-5" />
+                  <Handshake className="w-5 h-5" />
                   <span>Join Room</span>
                 </div>
               )}
@@ -151,7 +151,7 @@ const SignIn: React.FC<SignInProps> = ({ onJoinRoom, onCreateRoom, setResetLoadi
                 </div>
               ) : (
                 <div className="flex items-center justify-center space-x-2">
-                  <Sparkles className="w-5 h-5" />
+                  <FlaskConical className="w-5 h-5" />
                   <span>Create New Room</span>
                 </div>
               )}

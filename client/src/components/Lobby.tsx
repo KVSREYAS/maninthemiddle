@@ -40,7 +40,7 @@ const Lobby: React.FC<LobbyProps> = ({
   const readyCount = users.filter(u => u.isReady).length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900 p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-black p-4 relative overflow-hidden">
       {/* Animated background */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-1/4 right-1/4 w-72 h-72 bg-blue-500/5 rounded-full blur-3xl animate-pulse"></div>

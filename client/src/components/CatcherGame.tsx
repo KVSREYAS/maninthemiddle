@@ -450,7 +450,7 @@ const CatcherGame: React.FC<CatcherGameProps> = ({
   );
 
   return (
-    <div className="min-h-[80vh] bg-gradient-to-br from-slate-900 via-red-900/20 to-slate-900 p-3 relative overflow-hidden">
+    <div className="min-h-[80vh] bg-black p-3 relative overflow-hidden">
       {/* Dynamic background */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-1/4 right-1/4 w-80 h-80 bg-red-500/10 rounded-full blur-3xl animate-pulse"></div>
@@ -804,21 +804,21 @@ const CatcherGame: React.FC<CatcherGameProps> = ({
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
           <div className="bg-slate-800 rounded-2xl border border-cyan-400/50 shadow-lg shadow-cyan-500/20 w-full max-w-2xl mx-4 animate-scale-in">
             <div className="p-6 border-b border-cyan-400/20 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-cyan-300 flex items-center space-x-2">
+              <h2 className="text-xl font-bold text-red-300 flex items-center space-x-2">
                 <Info className="w-5 h-5" />
                 <span>Game Instructions</span>
               </h2>
               <button onClick={() => setShowInstructions(false)} className="text-gray-400 hover:text-white transition-colors text-xl">✕</button>
             </div>
             <div className="p-6 space-y-4 text-white text-lg">
-              <p><span className="text-cyan-400 font-semibold">Goal:</span> Survive as a normal player or deceive as the Catcher (impostor)!</p>
+              <p><span className="text-red-400 font-semibold">Goal:</span> Stop them from guessing the answer!</p>
               <ul className="list-disc pl-6 space-y-2">
-                <li>At least 3 players are needed for an impostor to be present.</li>
-                <li>One player is randomly assigned as the Catcher (impostor), others are Survivors.</li>
-                <li>Survivors must answer questions and use clues to guess the correct answer.</li>
-                <li>The Catcher can create fake AI responses to mislead Survivors.</li>
-                <li>Use chat and power-ups to communicate and strategize.</li>
-                <li>If a Survivor guesses the answer, Survivors win. If the Catcher deceives everyone, the Catcher wins.</li>
+                <li>You are a Catcher (impostor) trying to deceive the Survivors.</li>
+                <li>You can never reveal your identity as the Catcher.</li>
+                <li>You must create confusion and mislead the Survivors.</li>
+                <li>You can create Fake AI responses to mislead Survivors.</li>
+                <li>Use chat and power-ups to cause confusion</li>
+                <li>Remember, Chaos is your biggest ally!</li>
               </ul>
             </div>
           </div>
