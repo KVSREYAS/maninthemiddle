@@ -141,6 +141,7 @@ def handle_connect():
 
 @socketio.on('connect_msg')
 def connect_msg(username, roomid):
+    print("Recieved connect msg")
     try:
         roomid_int = int(roomid)
     except (ValueError, TypeError):

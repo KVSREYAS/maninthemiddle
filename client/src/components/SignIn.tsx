@@ -37,6 +37,8 @@ const SignIn: React.FC<SignInProps> = ({ onJoinRoom, onCreateRoom, setResetLoadi
     // Simulate loading
     await new Promise(resolve => setTimeout(resolve, 1500));
     onJoinRoom(username.trim(), roomId.trim());
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    setIsLoading(false);
   };
 
   const handleCreateRoom = async (e: React.MouseEvent) => {
