@@ -10,8 +10,8 @@ import { Home, Target } from 'lucide-react';
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useNavigate } from 'react-router-dom';
 
-// const SERVER_URL = "https://maninthemiddle-production.up.railway.app";
-const SERVER_URL = "http://localhost:8080";
+const SERVER_URL = "https://maninthemiddle-production.up.railway.app";
+// const SERVER_URL = "http://localhost:8080";
 
 const App: React.FC = () => {
   const [socket, setSocket] = useState<typeof Socket | null>(null);
@@ -183,6 +183,7 @@ const App: React.FC = () => {
     if (socket) {
       socket.disconnect();
     }
+    navigate("/");
     setCurrentPage('signin');
     setCurrentUser(null);
     setCurrentRoom(null);
@@ -329,7 +330,7 @@ const App: React.FC = () => {
         }
       />
 
-      <Route path="/" element={<NotFound/>} />
+      <Route path="/" element={<App/>} />
 
       <Route path="/Lobby" element={<Lobby
         user={currentUser}

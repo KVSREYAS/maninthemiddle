@@ -14,7 +14,7 @@ llm = ChatGroq(
 
 # Define the prompt as a string
 
-json_format = '''{\n  "question": "Guess the type",\n  "clues": [\n    "<general context clue>",\n    "<more specific but still challenging clue>"\n  ],\n  "answer": "<the exact correct answer>"\n}'''
+json_format = '''{\n  "question": "Guess the type(replace with type mentioned)",\n  "clues": [\n    "<general context clue>",\n    "<more specific but still challenging clue>"\n  ],\n  "answer": "<the exact correct answer>"\n}'''
 
 prompt = PromptTemplate(
     template=(
