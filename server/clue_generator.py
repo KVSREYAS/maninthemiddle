@@ -22,10 +22,10 @@ prompt = PromptTemplate(
         "Role: Game Master\n"
         "Task: Generate an interesting {type} and two challenging clues\n\n"
         "Requirements:\n"
-        "- Choose an interesting {type} that's not immediately obvious but can be figured out\n"
+        "- Choose an interesting {type} that's not immediately obvious but can be figured out. The chosen {type} should be common and known to all.\n"
         "- Create two clues that are challenging but not impossible to solve\n"
-        "- First clue should be more general, giving a broad category or context\n"
-        "- Second clue should be more specific but still require some deduction\n"
+        "- First clue should be a haiku. It should mildly hint them towards the idea but shouldnt be revealing\n"
+        "- Second clue should be funny with a bit of wordplay but should not be revealing at all.Make sure its a bit hard to figure out the answer\n"
         "- Clues should be interesting enough to spark follow-up questions\n"
         "- The answer should be something that can be discovered through logical questioning\n"
         "- Avoid making it too easy or too hard - aim for a 3-5 question solve\n"
@@ -55,12 +55,12 @@ def generate_clue():
         print("Raw response:", game_json)
         # Return a default response in case of error
         result = {
-            "question": f"Guess the {type_choice}",
+            "question": "Guess the location",
             "clues": [
-                "Error generating clues. Please try again.",
-                "The system encountered an issue."
+                "Golden gates high, Sunset fades to blue, Misty mornings rise",
+                "Where dreams take flight, and the sea whispers secrets"
             ],
-            "answer": "Error"
+            "answer": "San Francisco"
         }
     return result
 
@@ -104,5 +104,5 @@ def answer_question(answer, question):
     return json.loads(response["game"])["answer"]
 
 if __name__ == "__main__":
-    result = answer_question("A detective", "Does the person usually wear a hat?")
-    print(result)
+    # result = answer_question("A detective", "Does the person usually wear a hat?")
+    print(generate_clue())

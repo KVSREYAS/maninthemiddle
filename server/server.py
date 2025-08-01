@@ -169,6 +169,7 @@ def room_creation(username):
     global next_avail_room
     print(next_avail_room)
     create_room(next_avail_room)
+    print("Creating room with ID:", next_avail_room)
     socketio.emit('new_room_id',next_avail_room,to=request.sid)
     connect_msg(username,next_avail_room)
     next_avail_room+=1
@@ -190,15 +191,73 @@ def handle_disconnect():
         rooms.pop(user_room_id,None)
         print(rooms)
     print(rooms)
-    
+
+@socketio.on('leave_game')
+def leave_game():
+    user_room_id = usertoroom[request.sid]
+    username = rooms[user_room_id]["connected_users"].get(request.sid, "Unknown")
+    print(f"{username} has left the game")
+    rooms[user_room_id]["connected_users"].pop(request.sid, None)
+    rooms[user_room_id]["user_status"].pop(request.sid, None)
+    rooms[user_room_id]["user_roles"].pop(request.sid, None)
+    # rooms[user_room_id]["role_assigned"] = False
+    broadcast_all_users(user_room_id)
+    send(f"{username} has left", broadcast=True)
+    if len(rooms[user_room_id]["connected_users"]) == 0:
+        print(user_room_id)
+        rooms.pop(user_room_id, None)
+        print(rooms)
+    usertoroom.pop(request.sid, None)
+
+
 @socketio.on('send_message')
 def handle_message(msg,username):
     print('Message recieved',msg)
     msg=convert_func(msg)
+    roomno=usertoroom[request.sid]
     string=username+" : "+msg
     self_string="You: " + msg
-    send(string,broadcast=True,include_self=False)
+    for user in rooms[roomno]["connected_users"]:
+        if user != request.sid:
+            print(f"Sending message to {user}")
+            send(string,to=user)
+    # send(string,broadcast=True,include_self=False)
     send(self_string,to=request.sid)
+
+
+def is_answer_correct(actual_answer: str, user_answer: str) -> bool:
+    # Words to remove
+    remove_words = {"the", "a", "an"}
+    
+    def clean_text(text):
+        words = text.lower().split()
+        return " ".join(word for word in words if word not in remove_words)
+    
+    # Clean both answers
+    actual_clean = clean_text(actual_answer)
+    user_clean = clean_text(user_answer)
+    
+    # Function to calculate edit distance
+    def edit_distance(s1, s2):
+        m, n = len(s1), len(s2)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]
+        
+        for i in range(m + 1):
+            for j in range(n + 1):
+                if i == 0:
+                    dp[i][j] = j
+                elif j == 0:
+                    dp[i][j] = i
+                elif s1[i-1] == s2[j-1]:
+                    dp[i][j] = dp[i-1][j-1]
+                else:
+                    dp[i][j] = 1 + min(dp[i-1][j],     # deletion
+                                       dp[i][j-1],     # insertion
+                                       dp[i-1][j-1])   # substitution
+        return dp[m][n]
+    
+    # Check edit distance tolerance of 1
+    return edit_distance(actual_clean, user_clean) <= 1
 
 @socketio.on('submit_answer')
 def handle_answer(answer, username):
@@ -207,7 +266,7 @@ def handle_answer(answer, username):
     print(f'Correct answer is: {rooms[roomid]["answer"]}')
     
     # Check if the answer is correct
-    is_correct = answer.lower().strip() == rooms[roomid]["answer"].lower().strip()
+    is_correct = is_answer_correct(rooms[roomid]["answer"], answer)
     print(f'Is answer correct? {is_correct}')
     
     # Send the result to all players
@@ -237,8 +296,11 @@ def answer_ques(question):
     username=rooms[roomid]["connected_users"][request.sid]
     question_string=username+" : "+question
     ans="AI: "+ans
-    send(question_string,broadcast=True)
-    send(ans,broadcast=True)
+    for user in rooms[roomid]["connected_users"]:
+        print(f"Sending message to {user}")
+        send(question_string,to=user)
+        send(ans,to=user)
+
 
 @socketio.on("handle_fake_answer")
 def handle_fake_answer(question,answer):
@@ -246,9 +308,10 @@ def handle_fake_answer(question,answer):
     username=rooms[roomid]["connected_users"][request.sid]
     question_string=username+" : "+question
     ans="AI: "+answer
-    send(question_string,broadcast=True)
-    send(ans,broadcast=True)
-
+    for user in rooms[roomid]["connected_users"]:
+        print(f"Sending message to {user}")
+        send(question_string,to=user)
+        send(ans,to=user)
 
 
 

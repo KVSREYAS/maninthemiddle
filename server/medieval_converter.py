@@ -14,7 +14,7 @@ llm = ChatGroq(
 
 # Define the prompt template
 prompt = ChatPromptTemplate.from_template(
-    '''You are a medieval translator. Rewrite the text in a funny medieval style with random old-timey words (like goblets, dragons, or kings), but don’t change the meaning.
+    '''You are a british translator. Rewrite the text in a funny british style, but don’t change the meaning.
 
 🏰 Rules:
 
@@ -24,7 +24,7 @@ Make the output short — about the same length as the original text.
 
 Keep it easy to understand, even if it sounds medieval.
 
-Do NOT use overly formal words like “doth”, “thy”, “thou”,"verily", or “hast”.
+Make it sound a bit silly or exaggerated.
 
 Only use words which are still known to everyone.
 

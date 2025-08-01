@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { User, Gamepad2, Users, Sparkles,Handshake,Briefcase,FlaskConical,Puzzle } from 'lucide-react';
+import Lottie from 'lottie-react';
+import animationData from '../assets/Loading animation.json';
 
 interface SignInProps {
   onJoinRoom: (username: string, roomId: string) => void;
@@ -76,12 +78,17 @@ const SignIn: React.FC<SignInProps> = ({ onJoinRoom, onCreateRoom, setResetLoadi
       <div className="relative z-10 w-full max-w-md">
         {/* Logo/Title */}
         <div className="text-center mb-8 animate-fade-in">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-2xl mb-4 shadow-lg shadow-cyan-500/25">
-            <Puzzle className="w-10 h-10 text-white" />
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-black rounded-2xl mb-4 shadow-lg shadow-cyan-500/25">
+            <Lottie
+              animationData={animationData}
+              loop={true}
+              style={{ height: 100, width: 120 }}
+            />
           </div>
-          <h1 className="text-4xl font-bold text-white mb-2 bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
+          <h1 className="text-4xl font-[Oswald] text-white mb-2 bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent neon-glow">
             Misclue
           </h1>
+
           <p className="text-lg text-purple-300 italic mb-2">Can you outwit the Catcher and solve the mystery?</p>
         </div>
 

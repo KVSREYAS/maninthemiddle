@@ -10,8 +10,8 @@ import { Home, Target } from 'lucide-react';
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useNavigate } from 'react-router-dom';
 
-const SERVER_URL = "https://maninthemiddle-production.up.railway.app";
-// const SERVER_URL = "http://localhost:8080";
+// const SERVER_URL = "https://maninthemiddle-production.up.railway.app";
+const SERVER_URL = "http://localhost:3000";
 
 const App: React.FC = () => {
   const [socket, setSocket] = useState<typeof Socket | null>(null);
@@ -181,7 +181,7 @@ const App: React.FC = () => {
 
   const handleLeaveGame = () => {
     if (socket) {
-      socket.disconnect();
+      socket.emit("leave_game");
     }
     navigate("/");
     setCurrentPage('signin');
