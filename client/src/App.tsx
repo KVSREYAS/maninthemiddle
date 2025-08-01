@@ -10,8 +10,10 @@ import { Home, Target } from 'lucide-react';
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useNavigate } from 'react-router-dom';
 
-const SERVER_URL = "https://maninthemiddle-production.up.railway.app";
-// const SERVER_URL = "http://localhost:3000";
+
+
+const SERVER_URL = import.meta.env.VITE_SERVER_URL;
+
 
 const App: React.FC = () => {
   const [socket, setSocket] = useState<typeof Socket | null>(null);
@@ -190,6 +192,7 @@ const App: React.FC = () => {
     setMessages([]);
     setUsers([]);
     setGameStarted(false);
+    setGameOverData(null);
     setGameState('lobby');
   };
 
