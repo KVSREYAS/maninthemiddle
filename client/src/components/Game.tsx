@@ -324,6 +324,7 @@ const Game: React.FC<GameProps> = ({
   // const [client_sentat,setClientsentat]=useState<number>(0);
   const clientSentat=useRef<number>(0);
   const hasEmittedStartTimer = useRef(false);
+  const starttimer=useRef(false);
   // // Helper to get now in server time
   // function nowServer() {
   //   return Date.now() + serverTimeOffset;
@@ -424,12 +425,16 @@ useEffect(()=>{
       const delay=server_time_now-data.startTime;
       setTimeout(()=>{
         console.log(data.duration);
+        if(starttimer.current) return; // Prevent multiple starts
+        starttimer.current=true;
         start_timer(data.duration);
       },delay)
     }
     else{
       const time_elapsed=server_time_now-data.serverTime
       console.log(data.duration-time_elapsed);
+      if(starttimer.current) return; // Prevent multiple starts
+      starttimer.current=true;
       start_timer(data.duration-time_elapsed);
     }
   });
