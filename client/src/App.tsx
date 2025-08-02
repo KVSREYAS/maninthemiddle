@@ -246,9 +246,9 @@ const App: React.FC = () => {
     );
   };
   
-  if (currentPage === 'signin') {
-    return <SignIn onJoinRoom={handleJoinRoom} onCreateRoom={handleCreateRoom} setResetLoading={setSignInResetLoading} error={signInError} clearError={() => setSignInError(null)} creatingRoom={creatingRoom} />;
-  }
+  // if (currentPage === 'signin') {
+  //   return <SignIn onJoinRoom={handleJoinRoom} onCreateRoom={handleCreateRoom} setResetLoading={setSignInResetLoading} error={signInError} clearError={() => setSignInError(null)} creatingRoom={creatingRoom} />;
+  // }
 
   // if (currentPage === 'lobby' && currentUser) {
   //   return (
@@ -333,7 +333,7 @@ const App: React.FC = () => {
         }
       />
 
-      <Route path="/" element={<App/>} />
+      <Route path="/" element={<SignIn onJoinRoom={handleJoinRoom} onCreateRoom={handleCreateRoom} setResetLoading={setSignInResetLoading} error={signInError} clearError={() => setSignInError(null)} creatingRoom={creatingRoom} />} />
 
       <Route path="/Lobby" element={<Lobby
         user={currentUser}

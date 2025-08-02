@@ -383,13 +383,18 @@ const Game: React.FC<GameProps> = ({
   // }, [serverStartTime, serverDuration, serverTimeOffset, onLeaveGame]);
 
 const start_timer=(duration:number)=>{
-  var duration_in_secs=Math.floor(duration/1000);
+  setGameTime(Math.floor(duration/1000));
   setInterval(()=>{
-    setGameTime(duration_in_secs);
-    duration_in_secs=duration_in_secs-1;
-  },1000)
-}
-
+    setGameTime(prev => Math.max(0, prev - 1));
+  }, 1000);
+};
+useEffect(() => {
+  socket.on('penalty', (data: { penalty: number }) => {
+    console.log('Penalty received:', data.penalty);
+    setGameTime(prev => Math.max(0, prev - data.penalty));
+    // Handle penalty (e.g., reduce time)
+  });
+}, [socket]);
 
 
 useEffect(()=>{
@@ -441,6 +446,7 @@ useEffect(()=>{
         setShowAnswerResult(true);
       }
     });
+  
 
     return () => {
       socket.off('answer_result');
@@ -640,13 +646,10 @@ useEffect(()=>{
 
               <button
                 onClick={() => setShowSubmitAnswer(true)}
-                disabled={hasSubmittedAnswer}
-                className={`w-full py-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl font-semibold transition-all duration-300 hover:scale-105 flex items-center justify-center space-x-3 shadow-lg shadow-blue-500/20 ${
-                  hasSubmittedAnswer ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
+                className={`w-full py-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl font-semibold transition-all duration-300 hover:scale-105 flex items-center justify-center space-x-3 shadow-lg shadow-blue-500/20 `}
               >
                 <Target className="w-6 h-6" />
-                <span>{hasSubmittedAnswer ? 'Answer Submitted' : 'Submit Answer'}</span>
+                <span>{'Submit Answer'}</span>
               </button>
             </div>
           </div>

@@ -269,14 +269,14 @@ const CatcherGame: React.FC<CatcherGameProps> = ({
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMessages]);
 
-  useEffect(() => {
-    console.log('Entered')
-    const timer = setInterval(() => {
-      setGameTime(prev => Math.max(0, prev - 1));
-    }, 1000);
+  // useEffect(() => {
+  //   console.log('Entered')
+  //   const timer = setInterval(() => {
+  //     setGameTime(prev => Math.max(0, prev - 1));
+  //   }, 1000);
 
-    return () => clearInterval(timer);
-  }, []);
+  //   return () => clearInterval(timer);
+  // }, []);
 
   useEffect(() => {
     socket.on('answer_result', (data: { username: string; is_correct: boolean; answer: string }) => {
@@ -302,12 +302,18 @@ const CatcherGame: React.FC<CatcherGameProps> = ({
   },[]);
 
   const start_timer=(duration:number)=>{
-    var duration_in_secs=Math.floor(duration/1000);
+    setGameTime(Math.floor(duration/1000));
     setInterval(()=>{
-      setGameTime(duration_in_secs);
-      duration_in_secs=duration_in_secs-1;
-    },1000)
-  }
+      setGameTime(prev => Math.max(0, prev - 1));
+    }, 1000);
+  };
+  useEffect(() => {
+    socket.on('penalty', (data: { penalty: number }) => {
+      console.log('Penalty received:', data.penalty);
+      setGameTime(prev => Math.max(0, prev - data.penalty));
+      // Handle penalty (e.g., reduce time)
+    });
+  }, [socket]);
   
   useEffect(()=>{
     socket.on('start_timer',(data:{startTime:number,duration:number,serverTime:number})=>{

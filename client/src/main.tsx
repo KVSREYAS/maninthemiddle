@@ -8,9 +8,8 @@ import ReactDOMClient from 'react-dom/client';
 
 
 ReactDOMClient.createRoot(document.getElementById('root')!).render(
-  <StrictMode>
     <BrowserRouter>
     <App />
     </BrowserRouter>
-  </StrictMode>
+
 );

@@ -28,6 +28,7 @@ user_roles={}
 first_time=True
 usertoroom={}
 next_avail_room=1
+timers={}
 
 def create_room(roomid):
     rooms[roomid]={}
@@ -42,7 +43,8 @@ def broadcast_all_users(roomid):
     user_list = [{"name": username, "ready": rooms[roomid]["user_status"][sid]} 
                  for sid, username in rooms[roomid]["connected_users"].items()]
     print(user_list)
-    socketio.emit('user_list', user_list)
+    for user in rooms[roomid]["connected_users"]:
+        socketio.emit('user_list', user_list, to=user)
 
 # def periodic_timer_corrections():
 #     while True:
@@ -73,6 +75,8 @@ def index():
 #     socketio.emit('new_room_id',next_avail_room,to=request.sid)
 #     next_avail_room+=1
     
+
+
 
 
 
@@ -159,7 +163,9 @@ def connect_msg(username, roomid):
     rooms[roomid_int]["user_status"][request.sid] = False
     print(rooms)
     string = username + " has arrived"
-    send(string, broadcast=True, include_self=False)
+    for user in rooms[roomid_int]["connected_users"]:
+        if user != request.sid:
+            send(string, to=user)
     broadcast_all_users(roomid_int)
     usertoroom[request.sid] = roomid_int
     socketio.emit("valid_room_id",{"success":True,"message":"Joined"}, to=request.sid)
@@ -185,10 +191,13 @@ def handle_disconnect():
     rooms[user_room_id]["user_roles"].pop(request.sid,None)
     rooms[user_room_id]["role_assigned"]=False
     broadcast_all_users(user_room_id)
-    send(f"{username} has left",broadcast=True)
+    for user in rooms[user_room_id]["connected_users"]:
+        if user != request.sid:
+            send(f"{username} has left", to=user)
     if len(rooms[user_room_id]["connected_users"])==0:
         print(user_room_id)
         rooms.pop(user_room_id,None)
+        timers.pop(user_room_id, None)
         print(rooms)
     print(rooms)
 
@@ -206,6 +215,8 @@ def leave_game():
     if len(rooms[user_room_id]["connected_users"]) == 0:
         print(user_room_id)
         rooms.pop(user_room_id, None)
+        timers.pop(user_room_id, None)
+        print(timers)
         print(rooms)
     usertoroom.pop(request.sid, None)
 
@@ -270,22 +281,30 @@ def handle_answer(answer, username):
     print(f'Is answer correct? {is_correct}')
     
     # Send the result to all players
-    socketio.emit('answer_result', {
-        'username': username,
-        'is_correct': is_correct,
-        'answer': answer
-    })
+    for user in rooms[roomid]["connected_users"]:
+        socketio.emit('answer_result', {
+            'username': username,
+            'is_correct': is_correct,
+            'answer': answer
+        },to=user)
     
     if is_correct:
         # If correct, end the game
         print("Correct answer! Emitting game_over event")
         print(f"Winner: {username}, Correct Answer: {rooms[roomid]['answer']}")
         # Emit to all clients in the room
-        socketio.emit('game_over', {
-            'winner': "The Guessers",
-            'correct_answer': rooms[roomid]["answer"]
-        })
+        for user in rooms[roomid]["connected_users"]:
+            socketio.emit('game_over', {
+                'winner': "The Guessers",
+                'correct_answer': rooms[roomid]["answer"]
+            }, to=user)
         print("Game over event emitted to room:", roomid)
+    else:
+        reduce_time(roomid,20)  # Reduce time by 10 seconds if the answer is incorrect
+        for user in rooms[roomid]["connected_users"]:
+            socketio.emit('penalty',{
+                'penalty': 20
+            }, to=user)  # Notify the user who answered incorrectly
 
 
 @socketio.on("answer_question")
@@ -325,6 +344,8 @@ def handle_sync_time(client_sent_at):
     })
 
 
+#Timer functions
+
 def timer_end(room_id):
     print(f"Timer ended for room: {room_id}")
     # Handle timer end logic here
@@ -335,6 +356,26 @@ def timer_end(room_id):
             'correct_answer': rooms[room_id]["answer"]
         }, to=user)
 
+def init_timer(game_id, duration):
+    end_time = time.time() + duration
+    t = threading.Timer(duration, timer_end, args=[game_id])
+    t.start()
+    timers[game_id] = {"timer": t, "end_time": end_time}
+    print(f"Timer started for {game_id} with {duration} seconds")
+
+def reduce_time(game_id, seconds):
+    if game_id in timers:
+        data = timers[game_id]
+        data["timer"].cancel()  # cancel old timer
+        remaining = data["end_time"] - time.time() - seconds
+        if remaining <= 0:
+            timer_end(game_id)
+        else:
+            init_timer(game_id, remaining)
+
+
+
+
 @socketio.on("start_timer_request")
 def start_timer():
     roomid = usertoroom[request.sid]
@@ -344,14 +385,16 @@ def start_timer():
         start_time = int(time.time() * 1000) + 2000  # 2s delay for sync
         duration = 300000 # 5 minutes in ms
         rooms[roomid]["timer"] = {"start_time": start_time, "duration": duration}
-        t=Timer(duration/1000, timer_end, args=[roomid])
-        t.start()
+        init_timer(roomid, duration / 1000)
+        print("Timer initialized for room:", roomid)
         print("Timer started")
         print('timer_req_recieved')
         print(type(start_time))
     else:
+        print("Timer already exists for this room")
         start_time=rooms[roomid]["timer"]["start_time"]
         duration=rooms[roomid]["timer"]["duration"]
+    print("Sending to",request.sid)
     socketio.emit('start_timer', {
         'startTime': start_time,
         'duration': duration,
