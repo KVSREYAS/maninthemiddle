@@ -323,7 +323,7 @@ const Game: React.FC<GameProps> = ({
   const timerIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   // const [client_sentat,setClientsentat]=useState<number>(0);
   const clientSentat=useRef<number>(0);
-
+  const hasEmittedStartTimer = useRef(false);
   // // Helper to get now in server time
   // function nowServer() {
   //   return Date.now() + serverTimeOffset;
@@ -400,8 +400,10 @@ useEffect(() => {
 useEffect(()=>{
   console.log('page opened')
   clientSentat.current=Date.now()
-  socket.emit('start_timer_request');
-
+  if(!hasEmittedStartTimer.current){
+    socket.emit('start_timer_request');
+    hasEmittedStartTimer.current = true;
+  }
 },[]);
 
 useEffect(()=>{
