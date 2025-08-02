@@ -400,10 +400,11 @@ useEffect(() => {
 useEffect(()=>{
   console.log('page opened')
   clientSentat.current=Date.now()
-  if(!hasEmittedStartTimer.current){
-    socket.emit('start_timer_request');
-    hasEmittedStartTimer.current = true;
-  }
+  if (hasEmittedStartTimer.current) return; // Prevent multiple emissions
+  console.log('Emitting start_timer_request');
+  socket.emit('start_timer_request');
+  hasEmittedStartTimer.current = true;
+
 },[]);
 
 useEffect(()=>{

@@ -358,59 +358,6 @@ const App: React.FC = () => {
 
     </Routes>
   );
-  
-//   if (currentPage === 'game' && currentUser && currentUser.role=='normal') {
-//     return (
-//       <Game
-//         user={currentUser}
-//         roomId={roomId}
-//         users={users.map(u => ({
-//           id: u.name,
-//           username: u.name,
-//           isReady: u.ready
-//         }))}
-//         chatMessages={messages.map((msg, index) => ({
-//           id: index.toString(),
-//           username: msg.split(':')[0] || 'System',
-//           message: msg.split(':')[1] || msg,
-//           timestamp: new Date()
-//         }))}
-//         onSendMessage={handleSendMessage}
-//         onLeaveGame={handleLeaveGame}
-//         question={question}
-//         clues={clues}
-//         socket={socket!}
-//         gameOverData={gameOverData}
-//       />
-//     );
-//   }
-  
-//   if (currentPage === 'game' && currentUser && currentUser.role=='catcher'){
-//     return (
-      // <CatcherGame
-      //   user={currentUser}
-      //   roomId={roomId}
-      //   users={users.map(u => ({
-      //     id: u.name,
-      //     username: u.name,
-      //     isReady: u.ready
-      //   }))}
-      //   chatMessages={messages.map((msg, index) => ({
-      //     id: index.toString(),
-      //     username: msg.split(':')[0] || 'System',
-      //     message: msg.split(':')[1] || msg,
-      //     timestamp: new Date()
-      //   }))}
-      //   onSendMessage={handleSendMessage}
-      //   onLeaveGame={handleLeaveGame}
-      //   question={question}
-      //   clues={clues}
-      //   answer={answer}
-      //   socket={socket!}
-      //   gameOverData={gameOverData}
-      // />
-//     );
-//   }
 
   return null;
 };
