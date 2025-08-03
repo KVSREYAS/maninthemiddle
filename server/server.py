@@ -117,9 +117,9 @@ def assign_roles():
     print(rooms)
     roomid=usertoroom[request.sid]
     socketio.emit("role_recieve",rooms[roomid]["user_roles"][request.sid],to=request.sid)
-    socketio.emit('q_recieve',rooms[roomid]["question"])
-    socketio.emit("clue_recieve",rooms[roomid]["clues"])
-    
+    socketio.emit('q_recieve',rooms[roomid]["question"],to=request.sid)
+    socketio.emit("clue_recieve",rooms[roomid]["clues"],to=request.sid)
+
     # Send answer only to the catcher
     if rooms[roomid]["user_roles"][request.sid] == "catcher":
         socketio.emit("answer_recieve", rooms[roomid]["answer"], to=request.sid)

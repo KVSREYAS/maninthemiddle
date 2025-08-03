@@ -253,6 +253,7 @@ const CatcherGame: React.FC<CatcherGameProps> = ({
   const [showAnswerResult, setShowAnswerResult] = useState(false);
   const [answerResult, setAnswerResult] = useState<{ isCorrect: boolean; message: string } | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const starttimer=useRef(false);
   
   // Add state for power-up counts
   const [powerUps, setPowerUps] = useState({
@@ -332,6 +333,8 @@ const CatcherGame: React.FC<CatcherGameProps> = ({
         const delay=server_time_now-data.startTime;
         setTimeout(()=>{
           console.log(data.duration);
+          if(starttimer.current) return; // Prevent multiple starts
+          starttimer.current=true;
           start_timer(data.duration);
         },delay)
       }
