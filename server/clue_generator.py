@@ -9,7 +9,7 @@ from langchain.chains import LLMChain
 load_dotenv()
 # api_key=os.getenv("GROQ_API_KEY")
 llm = ChatGroq(
-    model_name="llama-3.3-70b-versatile" # or "llama3-70b-8192", "mixtral-8x7b-32768", etc.
+    model_name="llama-3.3-70b-versatile", temperature=1.0,top_p=0.9
 )
 
 # Define the prompt as a string
@@ -22,15 +22,16 @@ prompt = PromptTemplate(
         "Role: Game Master\n"
         "Task: Generate an interesting {type} and two challenging clues\n\n"
         "Requirements:\n"
-        "- Choose an interesting {type} that's not immediately obvious but can be figured out. The chosen {type} should be common and known to all.\n"
+        "- Choose an interesting {type} that's not immediately obvious but can be figured out. The chosen {type} should be common and known to all. The chosen {type} should have a single unambiguous answer. The answer should be a single word.\n"
         "- Create two clues that are challenging but not impossible to solve\n"
-        "- First clue should be a haiku. It should mildly hint them towards the idea but shouldnt be revealing\n"
-        "- Second clue should be funny with a bit of wordplay but should not be revealing at all.Make sure its a bit hard to figure out the answer\n"
+        "- First clue should be a poem which rhymes. It should hint them towards the idea but shouldnt be revealing and the clue should make sense in hindsight.\n"
+        "- Second clue should be a very small story which is related to the answer as a clue. This story should be intriguing and it should make sense in hindsight. The story should not give away the answer but hint them towards it. Make sure its a bit hard to figure out the answer\n"
         "- Clues should be interesting enough to spark follow-up questions\n"
         "- The answer should be something that can be discovered through logical questioning\n"
         "- Avoid making it too easy or too hard - aim for a 3-5 question solve\n"
         "- Response must be in valid JSON format with no extra text or formatting\n"
         "- Do not include any explanations or additional text outside the JSON structure\n"
+        "- The clues should not contain any newlines or special characters that would break JSON formatting\n"
         "Response Format (respond with ONLY this JSON structure, no other text):\n"
         f"{json_format}" """
     ),

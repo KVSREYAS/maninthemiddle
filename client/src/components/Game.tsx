@@ -222,14 +222,14 @@ const GameOverPopup: React.FC<{
   data,
   currentUsername
 }) => {
-  const isCatcherWin = data.winner !== currentUsername;
+  const isCatcherWin = data.winner === 'Catcher';
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
-      <div className="bg-slate-800 rounded-2xl border border-red-400/50 shadow-lg shadow-red-500/20 w-full max-w-md mx-4 animate-scale-in">
-        <div className="p-6 border-b border-red-400/20">
+      <div className="bg-slate-800 rounded-2xl border border-cyan-400/50 shadow-lg shadow-cyan-500/20 w-full max-w-md mx-4 animate-scale-in">
+        <div className="p-6 border-b border-cyan-400/20">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold text-white flex items-center space-x-3">
-              <Target className="w-8 h-8 text-red-400" />
+              <Target className="w-8 h-8 text-cyan-400" />
               <span>Game Over!</span>
             </h2>
             <button
