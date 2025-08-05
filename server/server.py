@@ -383,7 +383,7 @@ def start_timer():
     print(rooms)
     if "timer" not in rooms[roomid]:
         start_time = int(time.time() * 1000) + 2000  # 2s delay for sync
-        duration = 300000 # 5 minutes in ms
+        duration = 180000 # 5 minutes in ms
         rooms[roomid]["timer"] = {"start_time": start_time, "duration": duration}
         init_timer(roomid, duration / 1000)
         print("Timer initialized for room:", roomid)

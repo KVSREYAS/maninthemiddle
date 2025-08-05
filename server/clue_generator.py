@@ -9,12 +9,17 @@ from langchain.chains import LLMChain
 load_dotenv()
 # api_key=os.getenv("GROQ_API_KEY")
 llm = ChatGroq(
-    model_name="llama-3.3-70b-versatile", temperature=1.0,top_p=0.9
+    model_name="gemma2-9b-it", temperature=1.2,top_p=0.9
 )
+
+
 
 # Define the prompt as a string
 
-json_format = '''{\n  "question": "Guess the type(replace with type mentioned)",\n  "clues": [\n    "<general context clue>",\n    "<more specific but still challenging clue>"\n  ],\n  "answer": "<the exact correct answer>"\n}'''
+with open("clue_prompt_variants.json", "r") as file:
+    clue_generator_json = json.load(file)
+
+json_format = '''{\n  "question": "Guess the Location",\n  "clues": [\n    "<general context clue>",\n    "<more specific but still challenging clue>"\n  ],\n  "answer": "<the exact correct answer>"\n}'''
 
 prompt = PromptTemplate(
     template=(
@@ -24,8 +29,8 @@ prompt = PromptTemplate(
         "Requirements:\n"
         "- Choose an interesting {type} that's not immediately obvious but can be figured out. The chosen {type} should be common and known to all. The chosen {type} should have a single unambiguous answer. The answer should be a single word.\n"
         "- Create two clues that are challenging but not impossible to solve\n"
-        "- First clue should be a poem which rhymes. It should hint them towards the idea but shouldnt be revealing and the clue should make sense in hindsight.\n"
-        "- Second clue should be a very small story which is related to the answer as a clue. This story should be intriguing and it should make sense in hindsight. The story should not give away the answer but hint them towards it. Make sure its a bit hard to figure out the answer\n"
+        "Instructions for clue 1: {clue_1_prompt}\n"
+        "Instructions for clue 2: {clue_2_prompt}\n"
         "- Clues should be interesting enough to spark follow-up questions\n"
         "- The answer should be something that can be discovered through logical questioning\n"
         "- Avoid making it too easy or too hard - aim for a 3-5 question solve\n"
@@ -35,18 +40,21 @@ prompt = PromptTemplate(
         "Response Format (respond with ONLY this JSON structure, no other text):\n"
         f"{json_format}" """
     ),
-    input_variables=["type", "json_format"]
+    input_variables=["type", "json_format","clue_1_prompt", "clue_2_prompt"]
 )
 
 
 def generate_clue():
-    type_choice = random.choice(["person", "place", "invention", "mythical creature", "event", "feeling", "tool"])
+    type_choice = random.choice(["Famous Monument", "Object", "Animal", "Event","Food","Country","Everyday Item","Profession",])
+    clue_no = random.randint(1, 30)
+    clue1 = clue_generator_json[str(clue_no)]["clue1_prompt"]
+    clue2 = clue_generator_json[str(clue_no)]["clue2_prompt"]
     chain = LLMChain(
         llm=llm,
         prompt=prompt,
         output_key="game"
     )
-    response = chain.invoke({"type": type_choice, "json_format": json_format})
+    response = chain.invoke({"type": type_choice, "json_format": json_format, "clue_1_prompt": clue1, "clue_2_prompt": clue2})
     # The response may be a dict with 'game' as a string containing JSON
     game_json = response.get("game", "")
     try:

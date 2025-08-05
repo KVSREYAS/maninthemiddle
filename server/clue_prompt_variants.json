@@ -1,0 +1,122 @@
+{
+  "1": {
+    "clue1_prompt": "First clue should be a clever riddle",
+    "clue2_prompt": "Second clue should be a metaphor that evokes the answer without stating it directly"
+  },
+  "2": {
+    "clue1_prompt": "First clue should resemble a cryptic crossword clue",
+    "clue2_prompt": "Second clue should be a haiku with a hidden hint"
+  },
+  "3": {
+    "clue1_prompt": "First clue should involve a play on words",
+    "clue2_prompt": "Second clue should be a modified version of a famous proverb with a twist"
+  },
+  "4": {
+    "clue1_prompt": "First clue should describe a scene or visual without naming the object",
+    "clue2_prompt": "Second clue should be a brief allegorical sentence symbolizing the answer"
+  },
+  "5": {
+    "clue1_prompt": "First clue should be a mysterious line from a fictional dialogue",
+    "clue2_prompt": "Second clue should sound like an inner monologue of someone discovering the answer"
+  },
+  "6": {
+    "clue1_prompt": "First clue should sound like it from a futuristic AI",
+    "clue2_prompt": "Second clue should be a cryptic quote in the style of Yoda"
+  },
+  "7": {
+    "clue1_prompt": "First clue should be a sarcastic observation",
+    "clue2_prompt": "Second clue should resemble a vague but insightful fortune cookie message"
+  },
+  "8": {
+    "clue1_prompt": "First clue should reference a historical event or figure indirectly",
+    "clue2_prompt": "Second clue should be an invented wise quote from a fictional philosopher"
+  },
+  "9": {
+    "clue1_prompt": "First clue should sound like it from a children's bedtime story",
+    "clue2_prompt": "Second clue should be a whimsical fairy tale-style moral"
+  },
+  "10": {
+    "clue1_prompt": "First clue should resemble a line from an urban legend",
+    "clue2_prompt": "Second clue should sound like a Zen Koan"
+  },
+  "11": {
+    "clue1_prompt": "First clue should look like a cryptic newspaper headline",
+    "clue2_prompt": "Second clue should be a misleading yet hint-filled tweet"
+  },
+  "12": {
+    "clue1_prompt": "First clue should use a scientific analogy",
+    "clue2_prompt": "Second clue should be a saying attributed to a mythical creature or god"
+  },
+  "13": {
+    "clue1_prompt": "First clue should describe a combination of emojis in words",
+    "clue2_prompt": "Second clue should be a short limerick that gives a hint"
+  },
+  "14": {
+    "clue1_prompt": "First clue should sound like a mysterious journal entry",
+    "clue2_prompt": "Second clue should resemble a vague prophecy"
+  },
+  "15": {
+    "clue1_prompt": "First clue should be from the object point of view",
+    "clue2_prompt": "Second clue should sound like an old tribal saying"
+  },
+  "16": {
+    "clue1_prompt": "First clue should sound like a distorted song lyric",
+    "clue2_prompt": "Second clue should resemble a line from a dream"
+  },
+  "17": {
+    "clue1_prompt": "First clue should look like a line from tech support chat",
+    "clue2_prompt": "Second clue should be a bizarre but poetic warning from a fictional manual"
+  },
+  "18": {
+    "clue1_prompt": "First clue should sound like a cryptic letter written decades ago",
+    "clue2_prompt": "Second clue should sound like advice from a time traveler"
+  },
+  "19": {
+    "clue1_prompt": "First clue should sound like a horoscope",
+    "clue2_prompt": "Second clue should resemble a poetic tarot interpretation"
+  },
+  "20": {
+    "clue1_prompt": "First clue should be a nature-inspired mini poem",
+    "clue2_prompt": "Second clue should sound like a note from someone who can speak to animals"
+  },
+  "21": {
+    "clue1_prompt": "First clue should resemble a line from a pirate map",
+    "clue2_prompt": "Second clue should be an old tavern legend with symbolic meaning"
+  },
+  "22": {
+    "clue1_prompt": "First clue should be from a detective notebook",
+    "clue2_prompt": "Second clue should resemble the cryptic last words of a caught criminal"
+  },
+  "23": {
+    "clue1_prompt": "First clue should sound like a transmission from space",
+    "clue2_prompt": "Second clue should be a line from a sacred chant of a fictional tribe"
+  },
+  "24": {
+    "clue1_prompt": "First clue should be like a movie teaser tagline",
+    "clue2_prompt": "Second clue should be a director poetic take on the film theme"
+  },
+  "25": {
+    "clue1_prompt": "First clue should be a math-style logic puzzle using only words",
+    "clue2_prompt": "Second clue should resemble an old teacher wise saying"
+  },
+  "26": {
+    "clue1_prompt": "First clue should sound like a cryptic recipe instruction",
+    "clue2_prompt": "Second clue should be an old grandma saying with a double meaning"
+  },
+  "27": {
+    "clue1_prompt": "First clue should seem like a broken translation from another language",
+    "clue2_prompt": "Second clue should be an ancient inscription from a cave wall"
+  },
+  "28": {
+    "clue1_prompt": "First clue should be part of a mysterious radio show",
+    "clue2_prompt": "Second clue should be a DJs final signoff with deeper meaning"
+  },
+  "29": {
+    "clue1_prompt": "First clue should look like a line from a forgotten ancient book",
+    "clue2_prompt": "Second clue should sound like a vague oracle's hint"
+  },
+  "30": {
+    "clue1_prompt": "First clue should be a line from a made-up folk song",
+    "clue2_prompt": "Second clue should be a shepherd reflection passed down generations"
+  }
+}

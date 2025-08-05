@@ -42,7 +42,7 @@ const AIChatPopup: React.FC<{ onClose: () => void; onUse: () => void; remainingU
             <div className="flex items-center space-x-3">
               <h2 className="text-2xl font-bold text-white flex items-center space-x-3">
                 <Brain className="w-8 h-8 text-blue-400" />
-                <span>Ask AI Assistant</span>
+                <span>Ask Game Master</span>
               </h2>
               <div className="ml-4 px-3 py-1 bg-blue-500/20 rounded-full border border-blue-400/30">
                 <span className="text-blue-400 font-semibold">{remainingUses} uses remaining</span>
@@ -306,7 +306,7 @@ const Game: React.FC<GameProps> = ({
   const [message, setMessage] = useState('');
   const [gameTime, setGameTime] = useState(300); // 5 minutes
   const [showAIChat, setShowAIChat] = useState(false);
-  const [aiResponseUses, setAiResponseUses] = useState(2);
+  const [aiResponseUses, setAiResponseUses] = useState(10);
   const [showSubmitAnswer, setShowSubmitAnswer] = useState(false);
   const [hasSubmittedAnswer, setHasSubmittedAnswer] = useState(false);
   const [showAnswerResult, setShowAnswerResult] = useState(false);
@@ -629,7 +629,7 @@ useEffect(()=>{
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold text-white flex items-center space-x-2">
                   <Brain className="w-6 h-6 text-blue-400" />
-                  <span>AI Assistant</span>
+                  <span>Game Master</span>
                 </h2>
                 <div className="px-3 py-1 bg-blue-500/20 rounded-full border border-blue-400/30">
                   <span className="text-blue-400 font-semibold">{aiResponseUses} uses remaining</span>
@@ -639,7 +639,7 @@ useEffect(()=>{
 
             <div className="flex-1 p-6 space-y-4 overflow-y-auto">
               <p className="text-slate-200 font-bold text-sm">
-                Ask the AI assistant for help in answering questions. The AI will provide helpful responses to guide you.
+                Ask the Game Master for help in answering questions. The Game Master will answer your question with yes/no.
               </p>
               <button
                 onClick={() => setShowAIChat(true)}
@@ -649,7 +649,7 @@ useEffect(()=>{
                 }`}
               >
                 <Brain className="w-6 h-6" />
-                <span>{aiResponseUses <= 0 ? 'No Uses Remaining' : 'Ask AI Assistant'}</span>
+                <span>{aiResponseUses <= 0 ? 'No Uses Remaining' : 'Ask Game Master'}</span>
               </button>
 
               <button
