@@ -9,9 +9,11 @@ from langchain.chains import LLMChain
 load_dotenv()
 # api_key=os.getenv("GROQ_API_KEY")
 llm = ChatGroq(
-    model_name="gemma2-9b-it", temperature=1.2,top_p=0.9
+    model_name="openai/gpt-oss-120b", temperature=1.2,top_p=0.9,response_format={"type": "json_object"}
 )
-
+llm2=ChatGroq(
+    model_name="openai/gpt-oss-20b", temperature=0.1,tools=[{"type":"browser_search"}]
+)
 
 
 # Define the prompt as a string
@@ -19,7 +21,7 @@ llm = ChatGroq(
 with open("clue_prompt_variants.json", "r") as file:
     clue_generator_json = json.load(file)
 
-json_format = '''{\n  "question": "Guess the Location",\n  "clues": [\n    "<general context clue>",\n    "<more specific but still challenging clue>"\n  ],\n  "answer": "<the exact correct answer>"\n}'''
+json_format = '''{\n  "question": "Guess the <replace with type>",\n  "clues": [\n    "<general context clue>",\n    "<more specific but still challenging clue>"\n  ],\n  "answer": "<the exact correct answer>"\n}'''
 
 prompt = PromptTemplate(
     template=(
@@ -45,7 +47,7 @@ prompt = PromptTemplate(
 
 
 def generate_clue():
-    type_choice = random.choice(["Famous Monument", "Object", "Animal", "Event","Food","Country","Everyday Item","Profession",])
+    type_choice = random.choice(["Famous Monument", "Object", "Animal", "Event","Food","Country","Everyday Item","Profession",""])
     clue_no = random.randint(1, 30)
     clue1 = clue_generator_json[str(clue_no)]["clue1_prompt"]
     clue2 = clue_generator_json[str(clue_no)]["clue2_prompt"]
@@ -105,7 +107,7 @@ def answer_question(answer, question):
         input_variables=["answer", "question", "json_format"]
     )
     chain = LLMChain(
-        llm=llm,
+        llm=llm2,
         prompt=answer_prompt,
         output_key="game"
     )
