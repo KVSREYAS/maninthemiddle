@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Users, Crown, Check, X, MessageCircle, Gamepad2, Info } from 'lucide-react';
+import briefcaseImg from '../assets/free-briefcase-icon-1965-thumb.png';
 import { User, ChatMessage } from '../types';
 
 interface LobbyProps {
@@ -24,6 +25,7 @@ const Lobby: React.FC<LobbyProps> = ({
   const [message, setMessage] = useState('');
   const chatEndRef = useRef<HTMLDivElement>(null);
   const [showInstructions, setShowInstructions] = useState(true);
+  const [particleImageUrl] = useState<string | null>(briefcaseImg);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -45,6 +47,32 @@ const Lobby: React.FC<LobbyProps> = ({
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-1/4 right-1/4 w-72 h-72 bg-amber-500/5 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute bottom-1/3 left-1/3 w-80 h-80 bg-yellow-500/5 rounded-full blur-3xl animate-pulse delay-1000"></div>
+      </div>
+
+      {/* Floating particles (detective briefcase by default) */}
+      <div className="absolute inset-0 pointer-events-none">
+        {particleImageUrl
+          ? [...Array(16)].map((_, i) => {
+              const size = 28 + Math.floor(Math.random() * 36);
+              return (
+                <img
+                  key={`lobby-img-${i}`}
+                  src={particleImageUrl}
+                  alt=""
+                  className="absolute opacity-20 animate-float"
+                  style={{
+                    left: `${Math.random() * 100}%`,
+                    top: `${Math.random() * 100}%`,
+                    width: `${size}px`,
+                    height: 'auto',
+                    animationDelay: `${Math.random() * 3}s`,
+                    animationDuration: `${3 + Math.random() * 2}s`,
+                    filter: 'grayscale(25%)'
+                  }}
+                />
+              );
+            })
+          : null}
       </div>
 
       {/* Instructions Popup */}
@@ -117,7 +145,7 @@ const Lobby: React.FC<LobbyProps> = ({
                   key={u.id}
                   className={`p-4 rounded-xl border transition-all duration-300 ${
                     u.id === user.id
-                      ? 'bg-cyan-500/20 border-cyan-400/50 shadow-lg shadow-cyan-500/10'
+                      ? 'bg-amber-500/20 border-amber-400/50 shadow-lg shadow-amber-500/10'
                       : 'bg-white/5 border-white/10 hover:bg-white/10'
                   }`}
                   style={{
@@ -268,6 +296,11 @@ const Lobby: React.FC<LobbyProps> = ({
         .animate-message-in {
           animation: message-in 0.3s ease-out;
         }
+        @keyframes float {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-10px) rotate(180deg); }
+        }
+        .animate-float { animation: float 4s ease-in-out infinite; }
       `}</style>
     </div>
   );

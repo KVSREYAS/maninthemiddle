@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { User, Gamepad2, Users, Sparkles, Search, Fingerprint, Puzzle } from 'lucide-react';
+import { User, Gamepad2, Users, Sparkles, Search, Fingerprint, Puzzle, Image as ImageIcon, Link as LinkIcon } from 'lucide-react';
 import Lottie from 'lottie-react';
 import animationData from '../assets/Loading animation.json';
-
+import briefcaseImg from '../assets/free-briefcase-icon-1965-thumb.png';
+import detective from '../assets/Boss (15 Mafia).json';
+import detective_icon from '../assets/detective_icon.png';
 interface SignInProps {
   onJoinRoom: (username: string, roomId: string) => void;
   onCreateRoom?: (username: string) => void;
@@ -16,6 +18,14 @@ const SignIn: React.FC<SignInProps> = ({ onJoinRoom, onCreateRoom, setResetLoadi
   const [username, setUsername] = useState('');
   const [roomId, setRoomId] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [customizeBgOpen, setCustomizeBgOpen] = useState(false);
+  const [particleImageUrl, setParticleImageUrl] = useState<string | null>(briefcaseImg);
+  const objectUrlRef = React.useRef<string | null>(null);
+  React.useEffect(() => {
+    return () => {
+      if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
+    };
+  }, []);
 
   const isLoadingRef = React.useRef(setIsLoading);
   React.useEffect(() => {
@@ -61,26 +71,47 @@ const SignIn: React.FC<SignInProps> = ({ onJoinRoom, onCreateRoom, setResetLoadi
 
       {/* Floating particles */}
       <div className="absolute inset-0 pointer-events-none">
-        {[...Array(20)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-1 h-1 bg-cyan-400/30 rounded-full animate-float"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              animationDuration: `${3 + Math.random() * 2}s`
-            }}
-          ></div>
-        ))}
+        {particleImageUrl
+          ? [...Array(16)].map((_, i) => {
+              const size = 32 + Math.floor(Math.random() * 40); // 32-72px
+              return (
+                <img
+                  key={`img-${i}`}
+                  src={particleImageUrl}
+                  alt=""
+                  className="absolute opacity-25 animate-float"
+                  style={{
+                    left: `${Math.random() * 100}%`,
+                    top: `${Math.random() * 100}%`,
+                    width: `${size}px`,
+                    height: 'auto',
+                    animationDelay: `${Math.random() * 3}s`,
+                    animationDuration: `${3 + Math.random() * 2}s`,
+                    filter: 'grayscale(25%)'
+                  }}
+                />
+              );
+            })
+          : [...Array(24)].map((_, i) => (
+              <div
+                key={`dot-${i}`}
+                className="absolute w-1.5 h-1.5 bg-amber-400/30 rounded-full animate-float"
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  top: `${Math.random() * 100}%`,
+                  animationDelay: `${Math.random() * 3}s`,
+                  animationDuration: `${3 + Math.random() * 2}s`
+                }}
+              ></div>
+            ))}
       </div>
 
       <div className="relative z-10 w-full max-w-md">
         {/* Logo/Title */}
         <div className="text-center mb-8 animate-fade-in">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-black rounded-2xl mb-4 shadow-lg shadow-cyan-500/25">
+          <div className="inline-flex items-center justify-center w-20 h-20">
             <Lottie
-              animationData={animationData}
+              animationData={detective}
               loop={true}
               style={{ height: 100, width: 120 }}
             />
@@ -97,7 +128,7 @@ const SignIn: React.FC<SignInProps> = ({ onJoinRoom, onCreateRoom, setResetLoadi
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-4">
               <div className="relative group">
-                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-cyan-400 transition-colors" />
+                <img src={detective_icon} alt="detective" className="absolute left-3 top-1/2 transform -translate-y-1/2 w-8 h-8 text-gray-400 group-focus-within:text-amber-400 transition-colors" />
                 <input
                   type="text"
                   placeholder="Enter your username"
@@ -106,13 +137,13 @@ const SignIn: React.FC<SignInProps> = ({ onJoinRoom, onCreateRoom, setResetLoadi
                     setUsername(e.target.value);
                     if (clearError) clearError();
                   }}
-                  className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all duration-300"
+                  className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20 transition-all duration-300"
                   required
                 />
               </div>
 
               <div className="relative group">
-                <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-cyan-400 transition-colors" />
+                <img src={detective_icon} alt="detective" className="absolute left-3 top-1/2 transform -translate-y-1/2 w-8 h-8 text-gray-400 group-focus-within:text-amber-400 transition-colors" />
                 <input
                   type="text"
                   placeholder="Enter room ID"
@@ -121,7 +152,7 @@ const SignIn: React.FC<SignInProps> = ({ onJoinRoom, onCreateRoom, setResetLoadi
                     setRoomId(e.target.value);
                     if (clearError) clearError();
                   }}
-                  className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all duration-300"
+                  className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20 transition-all duration-300"
                   required
                 />
               </div>
