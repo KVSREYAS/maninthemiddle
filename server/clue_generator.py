@@ -5,115 +5,163 @@ import random
 import json
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
-# Initialize the Groq LLM
+
+# Detective Game — single-file implementation
+# Features:
+# - LLM generates a small crime-scene narrative anchored to a simple GK answer
+# - Two in-world "documents" (manifesto/notes/letter) are produced as clues
+# - A witness exists and can be interrogated with yes/no questions (answers: yes/no/unknown)
+# - The answer is basic GK (common objects/animals/landmarks) so it's inclusive
+
 load_dotenv()
-# api_key=os.getenv("GROQ_API_KEY")
+
+# Configure your models (change API keys and model names as needed)
 llm = ChatGroq(
-    model_name="openai/gpt-oss-120b", temperature=1.2,top_p=0.9,response_format={"type": "json_object"}
+    model_name=os.getenv("GROQ_MODEL", "openai/gpt-oss-120b"),
+    temperature=1.0,
+    top_p=0.9,
+    response_format={"type": "json_object"}
 )
-llm2=ChatGroq(
-    model_name="openai/gpt-oss-20b", temperature=0.1,tools=[{"type":"browser_search"}]
+
+llm2 = ChatGroq(
+    model_name=os.getenv("GROQ_MODEL_SMALL", "openai/gpt-oss-20b"),
+    temperature=0.0,
+    tools=[]
 )
 
+# Basic-GK answer pool grouped by type (animals, landmarks, objects, natural)
+GK_POOL = {
+    "animal": [
+        "cat", "dog", "horse", "owl", "fish"
+    ],
+    "landmark": [
+        "eiffel tower", "pyramids", "statue of liberty"
+    ],
+    "object": [
+        "umbrella", "clock", "bicycle", "ladder", "bread", "door",
+        "window", "glasses", "polaroid", "backpack", "candle", "chair"
+    ],
+    "natural": [
+        "sun", "rainbow"
+    ]
+}
 
-# Define the prompt as a string
 
-with open("clue_prompt_variants.json", "r") as file:
-    clue_generator_json = json.load(file)
-
-json_format = '''{\n  "question": "Guess the <replace with type>",\n  "clues": [\n    "<general context clue>",\n    "<more specific but still challenging clue>"\n  ],\n  "answer": "<the exact correct answer>"\n}'''
-
-prompt = PromptTemplate(
+# Prompt: instruct LLM to pick an answer from BASIC_GK_POOL and craft crime scene + two documents + brief witness note
+GEN_CLUE_PROMPT = PromptTemplate(
     template=(
-        """You are the Game Master in a multiplayer deduction game called \"Guess the Thing\". Your task is to generate an interesting {type} and provide two challenging but solvable clues.\n\n"
-        "Role: Game Master\n"
-        "Task: Generate an interesting {type} and two challenging clues\n\n"
-        "Requirements:\n"
-        "- Choose an interesting {type} that's not immediately obvious but can be figured out. The chosen {type} should be common and known to all. The chosen {type} should have a single unambiguous answer. The answer should be a single word.\n"
-        "- Create two clues that are challenging but not impossible to solve\n"
-        "Instructions for clue 1: {clue_1_prompt}\n"
-        "Instructions for clue 2: {clue_2_prompt}\n"
-        "- Clues should be interesting enough to spark follow-up questions\n"
-        "- The answer should be something that can be discovered through logical questioning\n"
-        "- Avoid making it too easy or too hard - aim for a 3-5 question solve\n"
-        "- Response must be in valid JSON format with no extra text or formatting\n"
-        "- Do not include any explanations or additional text outside the JSON structure\n"
-        "- The clues should not contain any newlines or special characters that would break JSON formatting\n"
-        "Response Format (respond with ONLY this JSON structure, no other text):\n"
-        f"{json_format}" """
+        '''
+You are a noir-style case writer creating a compact, immersive crime scene for a detective game.
+Answer: {ans}
+Requirements:
+1) Crete the scene based on the answer given but do not mention the answer in the scene.
+2) Build a short crime-scene description (1-2 sentences) that would plausibly contain the answer as an object/landmark/animal.
+3) Create TWO in-universe written documents recovered at the scene ("manifesto", "diary fragment", "shipping note", "police tag", etc.). Each document should be 1-2 sentences long and suggest partial clues about the answer but NOT name it.
+5) The two documents alone should NOT be sufficient to determine the answer with certainty — they must require at least one yes/no interrogation to resolve ambiguity.
+Output format (STRICT JSON, no extra text):
+{{
+  "crime_scene": "...",
+  "documents": ["...", "..."],
+  "answer": "..."
+}}
+'''
     ),
-    input_variables=["type", "json_format","clue_1_prompt", "clue_2_prompt"]
+    input_variables=["ans"]
 )
+
+
+# Prompt for witness interrogation — llm2 will act as the witness and must reply with {"answer":"yes"/"no"/"unknown"}
 
 
 def generate_clue():
-    type_choice = random.choice(["Famous Monument", "Object", "Animal", "Event","Food","Country","Everyday Item","Profession",""])
-    clue_no = random.randint(1, 30)
-    clue1 = clue_generator_json[str(clue_no)]["clue1_prompt"]
-    clue2 = clue_generator_json[str(clue_no)]["clue2_prompt"]
-    chain = LLMChain(
-        llm=llm,
-        prompt=prompt,
-        output_key="game"
-    )
-    response = chain.invoke({"type": type_choice, "json_format": json_format, "clue_1_prompt": clue1, "clue_2_prompt": clue2})
-    # The response may be a dict with 'game' as a string containing JSON
-    game_json = response.get("game", "")
+    """Generate a round payload compatible with server.py usage.
+    Returns a dict with keys: question (str), clues (list[str]), answer (str)
+    """
+    chain = LLMChain(llm=llm, prompt=GEN_CLUE_PROMPT, output_key="game")
     try:
-        result = json.loads(game_json)
-    except json.JSONDecodeError as e:
-        print(f"Error parsing JSON response: {e}")
-        print("Raw response:", game_json)
-        # Return a default response in case of error
-        result = {
-            "question": "Guess the location",
-            "clues": [
-                "Golden gates high, Sunset fades to blue, Misty mornings rise",
-                "Where dreams take flight, and the sea whispers secrets"
-            ],
-            "answer": "San Francisco"
+        type_key = random.choice(list(GK_POOL.keys()))
+        ans = random.choice(GK_POOL[type_key])
+        # Debug: print formatted prompt input
+        try:
+            formatted_prompt = GEN_CLUE_PROMPT.format(ans=ans)
+            print("\n[DEBUG] GEN_CLUE_PROMPT input ->\n" + formatted_prompt + "\n")
+        except Exception as _:
+            print(f"[DEBUG] Failed to format GEN_CLUE_PROMPT with ans={ans}")
+        response = chain.invoke({"ans": ans})
+        raw = response.get("game", "")
+        obj = json.loads(raw)
+        # Validate expected keys from the LLM
+        if not all(k in obj for k in ("crime_scene", "documents", "answer")):
+            raise ValueError("Missing keys in LLM response")
+        if not isinstance(obj["documents"], list) or len(obj["documents"]) < 2:
+            raise ValueError("Documents must be a list of two strings")
+        # Map to server.py expected schema
+        question_text = f"{obj['crime_scene']}"
+        clues_list = [obj["documents"][0], obj["documents"][1]]
+        return {
+            "Crime Scene": question_text,
+            "documents": clues_list,
+            "answer": ans,
         }
-    return result
+    except Exception as e:
+        # Fallback example if LLM fails — already mapped to expected schema
+        print("[generate_clue] LLM error or invalid response — using fallback. Error:", e)
+        type_key = random.choice(list(GK_POOL.keys()))
+        answer = random.choice(GK_POOL[type_key])
+        crime_scene = "A dim alley dusted with rain; a single streetlight flickers over a scattered trail."
+        documents = [
+            "Evidence bag: metal spokes and a curved handle imprint near the doorway.",
+            "Receipt stub: Purchased near a station on a stormy evening."
+        ]
+        return {
+            "Crime Scene": f"{crime_scene}",
+            "Documents": [documents[0], documents[1]],
+            "answer": answer,
+        }
+witness_json_format='''{"answer": "yes"/"no"/"unknown"}'''
+WITNESS_PROMPT = PromptTemplate(
+    template=(
+        '''
+        
+        You are a witness. The hidden answer (object/animal/landmark) is provided in context.
+        Answer the detective's yes/no question ONLY with strict JSON as {witness_json_format}.
+        If the question asserts something that is generally true about the hidden answer, reply 'yes'. If generally false, 'no'. If ambiguous, reply 'unknown'.
+        Context (hidden true answer): {context}
+        Question: {question}
+        Response format: {witness_json_format}
+        '''
+    ),
+    input_variables=["context", "question","witness_json_format"]
+)
+
+
 
 def answer_question(answer, question):
-    json_format=''' '''
-    answer_prompt=PromptTemplate(
-        template=f'''You are a strict Game Master.
-                    The user gives you two inputs:
+    """Ask the witness (llm2) a yes/no question given the hidden answer.
+    Returns 'yes'/'no'/'unknown'.
+    """
+    print(answer,question)
+    print(WITNESS_PROMPT.format(context=answer, question=question,witness_json_format=witness_json_format))
+    # print(witness_json_format)
+    chain = LLMChain(llm=llm2, prompt=WITNESS_PROMPT, output_key="resp")
+    try:
+        # Debug: print formatted prompt input
+        try:
+            formatted_prompt = WITNESS_PROMPT.format(context=answer, question=question,witness_json_format=witness_json_format)
+            print("\n[DEBUG] WITNESS_PROMPT input ->\n" + formatted_prompt + "\n")
+        except Exception as _:
+            print("[DEBUG] Failed to format WITNESS_PROMPT")
+        response = chain.invoke({"context": answer, "question": question,"witness_json_format":witness_json_format})
+        raw = response.get("resp", "")
+        obj = json.loads(raw)
+        ans = obj.get("answer", "unknown")
+        if ans not in ("yes", "no", "unknown"):
+            return "unknown"
+        return ans
+    except Exception:
+        return "unknown"
 
-                    an object (a description of a thing, person, place, or concept)
 
-                    a question (a yes/no question about the object)
-
-                    Your task is to say whether the question fits the typical characteristics of the object.
-
-                    If the object clearly implies the answer is "yes", answer yes.
-                    If the object clearly implies the answer is "no", answer no.
-                    If the object does not provide enough information to answer definitively, answer "unknown".
-
-                    You must always respond in valid, strict JSON format, and nothing else.
-                    The JSON must have exactly one key-value pair:
-
-                    key: "answer"
-
-                    value: one of the strings "yes", "no", or "unknown"
-
-                    Do not include any text outside the JSON. Do not explain your reasoning. Do not add any comments.
-                    
-                    Object: {answer}
-                    Question: {question}
-                    Response Format (respond with ONLY this JSON structure, no other text or formatting):
-                    {json_format}''',
-        input_variables=["answer", "question", "json_format"]
-    )
-    chain = LLMChain(
-        llm=llm2,
-        prompt=answer_prompt,
-        output_key="game"
-    )
-    response = chain.invoke({"answer": answer, "question": question, "json_format": json_format})
-    return json.loads(response["game"])["answer"]
 
 if __name__ == "__main__":
-    # result = answer_question("A detective", "Does the person usually wear a hat?")
-    print(generate_clue())
+    print(answer_question("cat","Does it have whiskers"))

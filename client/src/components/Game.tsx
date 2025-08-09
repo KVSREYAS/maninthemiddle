@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, MessageCircle, Eye, Target, Shield, Users, Timer, Bot, Brain, Info } from 'lucide-react';
+import { Send, MessageCircle, Eye, Target, Shield, Users, Timer, Info, UserSearch, FileText, Key } from 'lucide-react';
 import { User, ChatMessage, GameProps } from '../types';
 
 declare global{
@@ -8,7 +8,7 @@ declare global{
   }
 }
 
-// AI Chat Popup Component for Survivor
+// AI Chat Popup Component for Survivor (Enquire Witness)
 const AIChatPopup: React.FC<{ onClose: () => void; onUse: () => void; remainingUses: number; handleAnswerQuestion: (question: string) => void }> = ({ 
   onClose, 
   onUse,
@@ -36,16 +36,16 @@ const AIChatPopup: React.FC<{ onClose: () => void; onUse: () => void; remainingU
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
-      <div className="bg-slate-800 rounded-2xl border border-blue-400/50 shadow-lg shadow-blue-500/20 w-full max-w-3xl mx-4 animate-scale-in">
-        <div className="p-6 border-b border-blue-400/20">
+      <div className="bg-slate-900 rounded-2xl border border-amber-400/40 shadow-lg shadow-amber-500/20 w-full max-w-3xl mx-4 animate-scale-in">
+        <div className="p-6 border-b border-amber-400/20">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <h2 className="text-2xl font-bold text-white flex items-center space-x-3">
-                <Brain className="w-8 h-8 text-blue-400" />
-                <span>Ask Game Master</span>
+                <UserSearch className="w-8 h-8 text-amber-400" />
+                <span>Enquire Witness</span>
               </h2>
-              <div className="ml-4 px-3 py-1 bg-blue-500/20 rounded-full border border-blue-400/30">
-                <span className="text-blue-400 font-semibold">{remainingUses} uses remaining</span>
+              <div className="ml-4 px-3 py-1 bg-amber-500/10 rounded-full border border-amber-400/30">
+                <span className="text-amber-400 font-semibold">{remainingUses} uses remaining</span>
               </div>
             </div>
             <button
@@ -60,47 +60,47 @@ const AIChatPopup: React.FC<{ onClose: () => void; onUse: () => void; remainingU
         <div className="p-6 space-y-6">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="question" className="block text-lg font-bold text-black mb-3">
-                Your Question
+              <label htmlFor="question" className="block text-lg font-bold text-amber-300 mb-3">
+                Your Interrogation
               </label>
               <textarea
                 id="question"
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
-                placeholder="Enter the question you want to ask the AI..."
-                className="w-full h-32 px-6 py-4 bg-slate-700/50 border-2 border-blue-400/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 transition-all duration-300 text-lg"
+                placeholder="Ask the witness a yes/no question..."
+                className="w-full h-32 px-6 py-4 bg-slate-800/60 border-2 border-amber-400/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20 transition-all duration-300 text-lg"
               />
             </div>
 
             <button
               type="submit"
               disabled={!question.trim() || isLoading || remainingUses <= 0}
-              className="w-full py-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl font-semibold text-lg transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-lg shadow-blue-500/20"
+              className="w-full py-4 bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-white rounded-xl font-semibold text-lg transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-lg shadow-amber-500/20"
             >
               {isLoading ? (
                 <span className="flex items-center justify-center space-x-2">
-                  <Brain className="w-5 h-5 animate-pulse" />
-                  <span>Processing...</span>
+                  <UserSearch className="w-5 h-5 animate-pulse" />
+                  <span>Questioning...</span>
                 </span>
               ) : remainingUses <= 0 ? (
                 <span className="flex items-center justify-center space-x-2">
-                  <Brain className="w-5 h-5" />
+                  <UserSearch className="w-5 h-5" />
                   <span>No Uses Remaining</span>
                 </span>
               ) : (
                 <span className="flex items-center justify-center space-x-2">
-                  <Brain className="w-5 h-5" />
-                  <span>Ask AI</span>
+                  <UserSearch className="w-5 h-5" />
+                  <span>Enquire</span>
                 </span>
               )}
             </button>
           </form>
 
           {answer && (
-            <div className="mt-6 p-6 bg-blue-500/10 border-2 border-blue-400/30 rounded-xl">
-              <h3 className="text-lg font-medium text-blue-400 mb-3 flex items-center space-x-2">
-                <Brain className="w-5 h-5" />
-                <span>AI Answer</span>
+            <div className="mt-6 p-6 bg-amber-500/10 border-2 border-amber-400/30 rounded-xl">
+              <h3 className="text-lg font-medium text-amber-400 mb-3 flex items-center space-x-2">
+                <UserSearch className="w-5 h-5" />
+                <span>Witness Reply</span>
               </h3>
               <p className="text-white text-lg leading-relaxed">{answer}</p>
             </div>
@@ -111,7 +111,7 @@ const AIChatPopup: React.FC<{ onClose: () => void; onUse: () => void; remainingU
   );
 };
 
-// Submit Answer Popup Componentserv
+// Submit Answer Popup Component (Try Enigma Code)
 const SubmitAnswerPopup: React.FC<{ onClose: () => void; onSubmit: (answer: string) => void }> = ({
   onClose,
   onSubmit
@@ -127,12 +127,12 @@ const SubmitAnswerPopup: React.FC<{ onClose: () => void; onSubmit: (answer: stri
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
-      <div className="bg-slate-800 rounded-2xl border border-blue-400/50 shadow-lg shadow-blue-500/20 w-full max-w-3xl mx-4 animate-scale-in">
+      <div className="bg-slate-900 rounded-2xl border border-amber-400/40 shadow-lg shadow-amber-500/20 w-full max-w-3xl mx-4 animate-scale-in">
         <div className="p-6 border-b border-blue-400/20">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold text-white flex items-center space-x-3">
-              <Target className="w-8 h-8 text-blue-400" />
-              <span>Submit Your Answer</span>
+              <Key className="w-8 h-8 text-amber-400" />
+              <span>Try Enigma Code</span>
             </h2>
             <button
               onClick={onClose}
@@ -147,24 +147,24 @@ const SubmitAnswerPopup: React.FC<{ onClose: () => void; onSubmit: (answer: stri
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="answer" className="block text-lg font-medium text-gray-300 mb-3">
-                Your Answer
+                Enter your code
               </label>
               <input
                 type="text"
                 id="answer"
                 value={answer}
                 onChange={(e) => setAnswer(e.target.value)}
-                placeholder="Enter your answer..."
-                className="w-full px-6 py-4 bg-slate-700/50 border-2 border-blue-400/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 transition-all duration-300 text-lg"
+                placeholder="Type your final guess..."
+                className="w-full px-6 py-4 bg-slate-800/60 border-2 border-amber-400/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20 transition-all duration-300 text-lg"
               />
             </div>
 
             <button
               type="submit"
               disabled={!answer.trim()}
-              className="w-full py-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl font-semibold text-lg transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-lg shadow-blue-500/20"
+              className="w-full py-4 bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-white rounded-xl font-semibold text-lg transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-lg shadow-amber-500/20"
             >
-              Submit Answer
+              Submit Code
             </button>
           </form>
         </div>
@@ -261,31 +261,30 @@ const GameOverPopup: React.FC<{
   );
 };
 
-// 1. Add CluesPopup component (copy/adapt from CatcherGame)
+// Document-themed Clues Popup
 const CluesPopup: React.FC<{ onClose: () => void; clues: string[] }> = ({ onClose, clues }) => (
-  <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
-    <div className="bg-slate-800 rounded-2xl border border-blue-400/50 shadow-lg shadow-blue-500/20 w-full max-w-md mx-4 animate-scale-in">
-      <div className="p-6 border-b border-blue-400/20 flex items-center justify-between">
-        <h2 className="text-xl font-bold text-white flex items-center space-x-3">
-          <span>Clues</span>
-        </h2>
-        <button
-          onClick={onClose}
-          className="text-gray-400 hover:text-white transition-colors text-xl"
-        >
-          ✕
-        </button>
-      </div>
-      <div className="p-6 space-y-4">
-        {clues.length === 0 ? (
-          <div className="text-gray-300">No clues available.</div>
-        ) : (
-          clues.map((clue, idx) => (
-            <div key={idx} className="text-white text-lg">
-              <span className="text-blue-400 font-semibold">Clue {idx + 1}:</span> {clue}
-            </div>
-          ))
-        )}
+  <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
+    <div className="w-full max-w-2xl mx-4 animate-scale-in">
+      <div className="bg-amber-50/95 text-slate-800 rounded-2xl border-2 border-amber-700 shadow-[0_10px_40px_rgba(251,191,36,0.15)]">
+        <div className="p-5 border-b-2 border-amber-700 flex items-center justify-between rounded-t-2xl bg-amber-100/70">
+          <h2 className="text-xl font-bold flex items-center gap-2">
+            <FileText className="w-5 h-5 text-amber-700" />
+            Case Documents
+          </h2>
+          <button onClick={onClose} className="text-amber-800 hover:text-amber-900 transition-colors text-xl">✕</button>
+        </div>
+        <div className="p-6 space-y-4">
+          {clues.length === 0 ? (
+            <div className="text-amber-900">No documents recovered.</div>
+          ) : (
+            clues.map((clue, idx) => (
+              <div key={idx} className="bg-amber-100/70 border border-amber-700/40 rounded-xl p-4 font-serif shadow-inner">
+                <div className="text-sm uppercase tracking-wide text-amber-700 mb-1">Document {idx + 1}</div>
+                <div className="text-slate-900">{clue}</div>
+              </div>
+            ))
+          )}
+        </div>
       </div>
     </div>
   </div>
@@ -304,7 +303,7 @@ const Game: React.FC<GameProps> = ({
   gameOverData
 }) => {
   const [message, setMessage] = useState('');
-  const [gameTime, setGameTime] = useState(300); // 5 minutes
+  const [gameTime, setGameTime] = useState(180); // 3 minutes
   const [showAIChat, setShowAIChat] = useState(false);
   const [aiResponseUses, setAiResponseUses] = useState(10);
   const [showSubmitAnswer, setShowSubmitAnswer] = useState(false);
@@ -312,6 +311,8 @@ const Game: React.FC<GameProps> = ({
   const [showAnswerResult, setShowAnswerResult] = useState(false);
   const [answerResult, setAnswerResult] = useState<{ isCorrect: boolean; message: string } | null>(null);
   const [showGameOver, setShowGameOver] = useState(false);
+  const [witnessLog, setWitnessLog] = useState<{ id: string; question: string; answer?: string }[]>([]);
+  const handledWitnessIdsRef = useRef<Set<string>>(new Set());
   const chatEndRef = useRef<HTMLDivElement>(null);
   // 2. Add showCluesPopup state
   const [showCluesPopup, setShowCluesPopup] = useState(false);
@@ -444,6 +445,12 @@ useEffect(()=>{
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMessages]);
 
+  useEffect(()=>{
+    socket.on('witness_answer',(data:{question:string,answer:string})=>{
+      setWitnessLog(prev=>[...prev,{id:data.question,question:data.question,answer:data.answer}]);
+    });
+  },[socket])
+
   useEffect(() => {
     socket.on('answer_result', (data: { username: string; is_correct: boolean; answer: string }) => {
       if (data.username === user.username) {
@@ -502,8 +509,8 @@ useEffect(()=>{
           </>
         ) : (
           <>
-            <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
-            <div className="absolute bottom-1/3 left-1/3 w-80 h-80 bg-green-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+            <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl animate-pulse"></div>
+            <div className="absolute bottom-1/3 left-1/3 w-80 h-80 bg-yellow-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
           </>
         )}
       </div>
@@ -513,26 +520,16 @@ useEffect(()=>{
         <div className="text-center mb-6 animate-fade-in">
           <div className="inline-flex items-center space-x-6 bg-white/10 backdrop-blur-lg rounded-2xl px-8 py-3 border border-white/20">
             <div className="flex items-center space-x-2">
-              <Timer className="w-5 h-5 text-cyan-400" />
+              <Timer className="w-5 h-5 text-amber-400" />
               <span className="text-xl font-bold text-white">{formatTime(gameTime)}</span>
             </div>
             <div className="h-6 w-px bg-white/20"></div>
             <div className="flex items-center space-x-2 text-sm text-gray-300">
-              <span>Room: {roomId}</span>
+              <span>Case ID: {roomId}</span>
             </div>
-            <div className="h-6 w-px bg-white/20"></div>
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-1 text-red-400">
-                <Target className="w-4 h-4" />
-                <span>{catcherCount} Catchers</span>
-              </div>
-              <div className="flex items-center space-x-1 text-blue-400">
-                <Shield className="w-4 h-4" />
-                <span>{normalCount} Players</span>
-              </div>
-            </div>
+
             <button
-              className="ml-4 px-3 py-1 bg-cyan-500/20 rounded-full border border-cyan-400/30 flex items-center space-x-2 text-cyan-300 hover:bg-cyan-500/40 transition-all duration-200"
+              className="ml-4 px-3 py-1 bg-amber-500/20 rounded-full border border-amber-400/30 flex items-center space-x-2 text-amber-300 hover:bg-amber-500/40 transition-all duration-200"
               onClick={() => setShowInstructions(true)}
             >
               <Info className="w-4 h-4" />
@@ -541,191 +538,210 @@ useEffect(()=>{
           </div>
         </div>
 
-        {/* Question, Clues, and Role Display */}
-        <div className="mb-6 flex flex-col items-center animate-role-reveal">
-          {/* Show Clues button should always be right of the guess card */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
-            {/* Guess the Thing Card */}
-            <div className="flex-1 max-w-3xl min-w-[300px] sm:min-w-[400px] md:min-w-[600px] px-10 py-4 rounded-2xl border-2 bg-blue-500/20 border-blue-400/50 shadow-lg shadow-blue-500/20 backdrop-blur-lg flex flex-col items-center justify-center" style={{ minHeight: '80px' }}>
-              <h2 className="text-2xl font-bold text-blue-400 mb-2 text-center">{question}</h2>
-            </div>
-            {/* Show Clues Button */}
-            <button
-              className="px-8 py-5 bg-blue-500/30 border border-blue-400/50 rounded-xl text-white font-bold text-lg hover:bg-blue-500/50 transition-all duration-200 min-w-[160px]"
-              style={{ height: '4.5rem' }}
-              onClick={() => setShowCluesPopup(true)}
-            >
-              Show Clues
-            </button>
-          </div>
-        </div>
 
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Players Status */}
-          <div className="lg:col-span-1 bg-white/10 backdrop-blur-lg rounded-2xl border border-white/20 animate-slide-left h-[calc(100vh-16rem)] flex flex-col">
-            <div className="p-6 border-b border-white/20">
-              <h2 className="text-xl font-bold text-white flex items-center space-x-2">
-                <Users className="w-5 h-5 text-blue-400" />
-                <span>Players</span>
-              </h2>
-            </div>
-
-            <div className="flex-1 p-4 space-y-3 overflow-y-auto">
-              {users.map((u, index) => (
-                <div
-                  key={u.id}
-                  className={`p-4 rounded-xl border transition-all duration-300 ${
-                    u.id === user.id
-                      ? 'bg-blue-500/20 border-blue-400/50 shadow-lg shadow-blue-500/10'
-                      : u.role === 'catcher'
-                      ? 'bg-red-500/10 border-red-400/30'
-                      : 'bg-blue-500/10 border-blue-400/30'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold relative ${
-                        u.role === 'catcher' ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'
-                      }`}>
-                        {u.username.charAt(0).toUpperCase()}
-                        {u.role === 'catcher' && (
-                          <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-400 rounded-full flex items-center justify-center">
-                            <Target className="w-2 h-2 text-white" />
-                          </div>
-                        )}
-                      </div>
-                      <div>
-                        <div className="flex items-center space-x-2">
-                          <span className="font-semibold text-white">{u.username}</span>
-                          {u.id === user.id && <span className="text-xs text-blue-400">(You)</span>}
-                        </div>
-                        <div className={`text-xs font-medium ${
-                          u.role === 'catcher' ? 'text-red-400' : 'text-blue-400'
-                        }`}>
-                          {u.role === 'catcher' ? 'Catcher' : 'Survivor'}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                  </div>
+        <div className="grid lg:grid-cols-2 gap-6">
+          {/* Left Column: Case File (top) + Players (bottom) */}
+          <div className="lg:col-span-1 h-[calc(100vh-16rem)]">
+            {/* Case File Panel */}
+            <div className="bg-amber-50/95 text-slate-800 rounded-2xl border-2 border-amber-700 shadow-[0_10px_40px_rgba(251,191,36,0.15)] h-full flex flex-col">
+              <div className="p-5 border-b-2 border-amber-700 flex items-center justify-between rounded-t-2xl bg-amber-100/70">
+                <h2 className="text-xl font-bold flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-amber-700" />
+                  Case File
+                </h2>
+              </div>
+              <div className="p-6 space-y-4">
+                <div className="bg-amber-100/70 border border-amber-700/40 rounded-xl p-4 font-serif shadow-inner">
+                  <div className="text-sm uppercase tracking-wide text-amber-700 mb-1">Case Brief</div>
+                  <div className="text-slate-900 text-lg">{question}</div>
                 </div>
-              ))}
+                <div className="space-y-3">
+                  {clues.map((clue, idx) => (
+                    <div key={idx} className="bg-amber-100/70 border border-amber-700/40 rounded-xl p-4 font-serif shadow-inner">
+                      <div className="text-sm uppercase tracking-wide text-amber-700 mb-1">Document {idx + 1}</div>
+                      <div className="text-slate-900 text-base">{clue}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
 
-            <div className="p-4 border-t border-white/20">
-              <button
-                onClick={onLeaveGame}
-                className="w-full py-3 bg-gray-600 hover:bg-gray-500 text-white rounded-xl font-semibold transition-all duration-300 hover:scale-105"
-              >
-                Leave Game
-              </button>
-            </div>
+
           </div>
 
-          {/* AI Assistant Section */}
-          <div className="lg:col-span-1 bg-white/10 backdrop-blur-lg rounded-2xl border border-blue-400/50 shadow-lg shadow-blue-500/20 animate-slide-left h-[calc(100vh-16rem)] flex flex-col">
-            <div className="p-6 border-b border-blue-400/20">
+          {/* Witness Desk */}
+          <div className="lg:col-span-1 bg-white/10 backdrop-blur-lg rounded-2xl border border-amber-400/40 shadow-lg shadow-amber-500/20 animate-slide-left h-[calc(100vh-16rem)] flex flex-col">
+            <div className="p-6 border-b border-amber-400/20">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold text-white flex items-center space-x-2">
-                  <Brain className="w-6 h-6 text-blue-400" />
-                  <span>Game Master</span>
+                  <UserSearch className="w-6 h-6 text-amber-400" />
+                  <span>Witness Desk</span>
                 </h2>
-                <div className="px-3 py-1 bg-blue-500/20 rounded-full border border-blue-400/30">
-                  <span className="text-blue-400 font-semibold">{aiResponseUses} uses remaining</span>
+                <div className="px-3 py-1 bg-amber-500/10 rounded-full border border-amber-400/30">
+                  <span className="text-amber-400 font-semibold">{aiResponseUses} uses remaining</span>
                 </div>
               </div>
             </div>
 
             <div className="flex-1 p-6 space-y-4 overflow-y-auto">
               <p className="text-slate-200 font-bold text-sm">
-                Ask the Game Master for help in answering questions. The Game Master will answer your question with yes/no.
+                Enquire the witness for yes/no leads. Use sparingly.
               </p>
               <button
                 onClick={() => setShowAIChat(true)}
                 disabled={aiResponseUses <= 0}
-                className={`w-full py-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl font-semibold transition-all duration-300 hover:scale-105 flex items-center justify-center space-x-3 shadow-lg shadow-blue-500/20 ${
+                className={`w-full py-4 bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-white rounded-xl font-semibold transition-all duration-300 hover:scale-105 flex items-center justify-center space-x-3 shadow-lg shadow-amber-500/20 ${
                   aiResponseUses <= 0 ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
               >
-                <Brain className="w-6 h-6" />
-                <span>{aiResponseUses <= 0 ? 'No Uses Remaining' : 'Ask Game Master'}</span>
+                <UserSearch className="w-6 h-6" />
+                <span>{aiResponseUses <= 0 ? 'No Uses Remaining' : 'Enquire Witness'}</span>
               </button>
 
               <button
                 onClick={() => setShowSubmitAnswer(true)}
-                className={`w-full py-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl font-semibold transition-all duration-300 hover:scale-105 flex items-center justify-center space-x-3 shadow-lg shadow-blue-500/20 `}
+                className={`w-full py-4 bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-white rounded-xl font-semibold transition-all duration-300 hover:scale-105 flex items-center justify-center space-x-3 shadow-lg shadow-amber-500/20 `}
               >
-                <Target className="w-6 h-6" />
-                <span>{'Submit Answer'}</span>
+                <Key className="w-6 h-6" />
+                <span>{'Try Enigma Code'}</span>
               </button>
-            </div>
-          </div>
 
-          {/* Game Chat */}
-          <div className="lg:col-span-1 bg-white/10 backdrop-blur-lg rounded-2xl border border-white/20 flex flex-col animate-slide-right h-[calc(100vh-16rem)]">
-            <div className="p-6 border-b border-white/20">
-              <h2 className="text-xl font-bold text-white flex items-center space-x-2">
-                <MessageCircle className="w-5 h-5 text-blue-400" />
-                <span>Game Chat</span>
-              </h2>
-            </div>
-
-            {/* Messages */}
-            <div className="flex-1 p-4 overflow-y-auto space-y-3">
-              {chatMessages.length === 0 ? (
-                <div className="text-center text-gray-400 py-8">
-                  <MessageCircle className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>Game chat is empty. Communicate with other players!</p>
+              {/* Witness Log */}
+              <div className="mt-2 bg-white/5 border border-white/10 rounded-xl p-3">
+                <div className="text-white text-sm font-semibold mb-2 flex items-center gap-2">
+                  <UserSearch className="w-4 h-4 text-amber-400" /> Witness Log
                 </div>
-              ) : (
-                chatMessages.map((msg) => {
-                  const msgUser = users.find(u => u.username === msg.username);
-                  return (
-                    <div
-                      key={msg.id}
-                      className={`p-3 rounded-xl max-w-xs ${
-                        msg.username === user.username
-                          ? 'bg-blue-500/20 border border-blue-400/30 ml-auto'
-                          : msgUser?.role === 'catcher'
-                          ? 'bg-red-500/20 border border-red-400/30'
-                          : 'bg-blue-500/20 border border-blue-400/30'
-                      } animate-message-in`}
-                    >
-                      <div className={`text-xs mb-1 flex items-center space-x-1 ${
-                        msgUser?.role === 'catcher' ? 'text-red-400' : 'text-blue-400'
-                      }`}>
-                        <span>{msg.username}</span>
-                        {msgUser?.role === 'catcher' && <Target className="w-3 h-3" />}
+                <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                  {witnessLog.length === 0 ? (
+                    <div className="text-gray-400 text-sm">No interrogations yet.</div>
+                  ) : (
+                    witnessLog.map((entry) => (
+                      <div key={entry.id} className="space-y-1">
+                        <div className="flex items-start gap-2">
+                          <div className="w-6 h-6 rounded-full bg-amber-500 text-white flex items-center justify-center text-xs shrink-0">
+                            <Shield className="w-4 h-4" />
+                          </div>
+                          <div className="bg-amber-500/20 border border-amber-400/30 text-white rounded-xl px-3 py-2 text-sm max-w-[80%]">
+                            {entry.question}
+                          </div>
+                        </div>
+                        {entry.answer && (
+                          <div className="flex items-start gap-2 justify-end">
+                            <div className="bg-amber-100/80 border border-amber-400/50 text-slate-900 rounded-xl px-3 py-2 text-sm max-w-[80%]">
+                              {entry.answer}
+                            </div>
+                            <div className="w-6 h-6 rounded-full bg-amber-200 text-amber-800 flex items-center justify-center text-xs shrink-0">
+                              <UserSearch className="w-4 h-4" />
+                            </div>
+                          </div>
+                        )}
                       </div>
-                      <div className="text-white">{msg.message}</div>
-                    </div>
-                  );
-                })
-              )}
-              <div ref={chatEndRef} />
-            </div>
-
-            {/* Message Input */}
-            <div className="p-4 border-t border-white/20">
-              <form onSubmit={handleSendMessage} className="flex space-x-3">
-                <input
-                  type="text"
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Send a message to all players..."
-                  className="flex-1 px-4 py-3 bg-white/5 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 transition-all duration-300"
-                />
-                <button
-                  type="submit"
-                  disabled={!message.trim()}
-                  className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-300 shadow-lg shadow-blue-500/25"
-                >
-                  <Send className="w-5 h-5" />
-                </button>
-              </form>
+                    ))
+                  )}
+                </div>
+              </div>
             </div>
           </div>
+
+          {/* Chat moved to floating bottom-right panel */}
+        </div>
+      </div>
+
+      {/* Floating Chat Panel */}
+      <div className="fixed bottom-4 right-4 z-20 w-80 sm:w-96 bg-white/10 backdrop-blur-lg rounded-2xl border border-white/20 shadow-xl flex flex-col">
+        <div className="p-3 border-b border-white/20 flex items-center gap-2">
+          <MessageCircle className="w-5 h-5 text-amber-400" />
+          <span className="text-sm font-semibold text-white">Case Chat</span>
+        </div>
+        <div className="flex-1 p-3 overflow-y-auto max-h-64 space-y-3">
+          {chatMessages.length === 0 ? (
+            <div className="text-center text-gray-400 py-4">
+              <MessageCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
+              <p>Share your leads here…</p>
+            </div>
+          ) : (
+            chatMessages.map((msg) => {
+              const msgUser = users.find(u => u.username === msg.username);
+              return (
+                <div
+                  key={msg.id}
+                  className={`p-2 rounded-xl max-w-[75%] ${
+                    msg.username === user.username
+                      ? 'bg-amber-500/20 border border-amber-400/30 ml-auto'
+                      : msgUser?.role === 'catcher'
+                      ? 'bg-red-500/20 border border-red-400/30'
+                      : 'bg-white/10 border border-white/10'
+                  } animate-message-in`}
+                >
+                  <div className={`text-[10px] mb-1 flex items-center space-x-1 ${
+                    msgUser?.role === 'catcher' ? 'text-red-400' : 'text-amber-300'
+                  }`}>
+                    <span>{msg.username}</span>
+                    {msgUser?.role === 'catcher' && <Target className="w-3 h-3" />}
+                  </div>
+                  <div className="text-white text-sm">{msg.message}</div>
+                </div>
+              );
+            })
+          )}
+          <div ref={chatEndRef} />
+        </div>
+        <div className="p-3 border-t border-white/20">
+          <form onSubmit={handleSendMessage} className="flex space-x-2">
+            <input
+              type="text"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="Type a message…"
+              className="flex-1 px-3 py-2 bg-white/5 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20 transition-all duration-300"
+            />
+            <button
+              type="submit"
+              disabled={!message.trim()}
+              className="px-4 py-2 bg-gradient-to-r from-amber-500 to-yellow-600 text-white rounded-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-300 shadow-lg shadow-amber-500/25"
+            >
+              <Send className="w-4 h-4" />
+            </button>
+          </form>
+        </div>
+      </div>
+
+      {/* Floating Players Panel */}
+      <div className="fixed bottom-4 left-4 z-20 w-72 sm:w-80 bg-white/10 backdrop-blur-lg rounded-2xl border border-white/20 shadow-xl flex flex-col">
+        <div className="p-3 border-b border-white/20 flex items-center gap-2">
+          <Users className="w-5 h-5 text-amber-400" />
+          <span className="text-sm font-semibold text-white">Detectives</span>
+        </div>
+        <div className="flex-1 p-3 overflow-y-auto max-h-56 space-y-2">
+          {users.map((u) => (
+            <div
+              key={u.id}
+              className={`p-2 rounded-xl border text-sm flex items-center justify-between ${
+                u.role === 'catcher'
+                  ? 'bg-red-500/10 border-red-400/30'
+                  : (u.id === user.id
+                    ? 'bg-amber-500/20 border-amber-400/30'
+                    : 'bg-white/10 border-white/10')
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <div className={`w-7 h-7 rounded-full flex items-center justify-center font-bold ${u.role === 'catcher' ? 'bg-red-500 text-white' : 'bg-amber-500 text-white'}`}>{u.username.charAt(0).toUpperCase()}</div>
+                <div className="flex flex-col leading-tight">
+                  <span className="text-white text-[13px]">{u.username} {u.id === user.id && <span className="text-amber-300 text-[10px]">(you)</span>}</span>
+                  <span className={`text-[10px] ${u.role === 'catcher' ? 'text-red-400' : 'text-amber-300'}`}>{u.role === 'catcher' ? 'Catcher' : 'Detective'}</span>
+                </div>
+              </div>
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+            </div>
+          ))}
+        </div>
+        <div className="p-3 border-t border-white/20">
+          <button
+            onClick={onLeaveGame}
+            className="w-full py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-xl text-sm font-semibold transition-all duration-300"
+          >
+            Leave Case
+          </button>
         </div>
       </div>
 

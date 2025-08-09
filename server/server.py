@@ -103,8 +103,8 @@ def user_ready():
         
         question=generate_clue()
         rooms[roomid]["answer"]=question['answer']
-        rooms[roomid]["question"]=question["question"]
-        rooms[roomid]["clues"]=question["clues"]
+        rooms[roomid]["question"]=question["Crime Scene"]
+        rooms[roomid]["clues"]=question["documents"]
         
         
         for user in rooms[roomid]["connected_users"]:
@@ -314,11 +314,13 @@ def answer_ques(question):
     ans=answer_question(rooms[roomid]["answer"],question)
     username=rooms[roomid]["connected_users"][request.sid]
     question_string=username+" : "+question
-    ans="AI: "+ans
+    ans_string="Witness: "+ans
     for user in rooms[roomid]["connected_users"]:
         print(f"Sending message to {user}")
-        send(question_string,to=user)
-        send(ans,to=user)
+        socketio.emit('witness_answer',{
+            'question': question,
+            'answer': ans
+        },to=user)
 
 
 @socketio.on("handle_fake_answer")
@@ -383,7 +385,7 @@ def start_timer():
     print(rooms)
     if "timer" not in rooms[roomid]:
         start_time = int(time.time() * 1000) + 2000  # 2s delay for sync
-        duration = 180000 # 5 minutes in ms
+        duration = 180000 # 3 minutes in ms
         rooms[roomid]["timer"] = {"start_time": start_time, "duration": duration}
         init_timer(roomid, duration / 1000)
         print("Timer initialized for room:", roomid)

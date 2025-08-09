@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, Gamepad2, Users, Sparkles,Handshake,Briefcase,FlaskConical,Puzzle } from 'lucide-react';
+import { User, Gamepad2, Users, Sparkles, Search, Fingerprint, Puzzle } from 'lucide-react';
 import Lottie from 'lottie-react';
 import animationData from '../assets/Loading animation.json';
 
@@ -54,9 +54,9 @@ const SignIn: React.FC<SignInProps> = ({ onJoinRoom, onCreateRoom, setResetLoadi
     <div className="min-h-screen bg-black flex items-center justify-center p-4 relative overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl animate-pulse delay-500"></div>
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-yellow-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-amber-400/10 rounded-full blur-3xl animate-pulse delay-500"></div>
       </div>
 
       {/* Floating particles */}
@@ -85,11 +85,11 @@ const SignIn: React.FC<SignInProps> = ({ onJoinRoom, onCreateRoom, setResetLoadi
               style={{ height: 100, width: 120 }}
             />
           </div>
-          <h1 className="text-4xl font-[Oswald] text-white mb-2 bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent neon-glow">
+          <h1 className="text-4xl font-[Oswald] text-white mb-2 bg-gradient-to-r from-amber-400 to-yellow-400 bg-clip-text text-transparent neon-glow">
             Misclue
           </h1>
 
-          <p className="text-lg text-purple-300 italic mb-2">Can you outwit the Catcher and solve the mystery?</p>
+          <p className="text-lg text-amber-300 italic mb-2">Put on your hat, follow the clues, and crack the case.</p>
         </div>
 
         {/* Sign In Form */}
@@ -130,17 +130,17 @@ const SignIn: React.FC<SignInProps> = ({ onJoinRoom, onCreateRoom, setResetLoadi
             <button
               type="submit"
               disabled={isLoading || creatingRoom || !username.trim() || !roomId.trim()}
-              className="w-full bg-gradient-to-r from-cyan-500 to-purple-500 text-white py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-cyan-500/25 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-300 relative overflow-hidden group"
+              className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 text-white py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-amber-500/25 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-300 relative overflow-hidden group"
             >
               {(isLoading && !creatingRoom) ? (
                 <div className="flex items-center justify-center space-x-2">
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  <span>Joining Room...</span>
+                  <span>Joining Investigation...</span>
                 </div>
               ) : (
                 <div className="flex items-center justify-center space-x-2">
-                  <Handshake className="w-5 h-5" />
-                  <span>Join Room</span>
+                  <Search className="w-5 h-5" />
+                  <span>Join Investigation</span>
                 </div>
               )}
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
@@ -149,17 +149,17 @@ const SignIn: React.FC<SignInProps> = ({ onJoinRoom, onCreateRoom, setResetLoadi
               type="button"
               disabled={isLoading || creatingRoom || !username.trim()}
               onClick={handleCreateRoom}
-              className="w-full mt-2 bg-gradient-to-r from-green-500 to-cyan-500 text-white py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-green-500/25 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-300 relative overflow-hidden group"
+              className="w-full mt-2 bg-gradient-to-r from-amber-600 to-yellow-600 text-white py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-yellow-500/25 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-300 relative overflow-hidden group"
             >
               {creatingRoom ? (
                 <div className="flex items-center justify-center space-x-2">
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  <span>Creating Room...</span>
+                  <span>Opening New Case...</span>
                 </div>
               ) : (
                 <div className="flex items-center justify-center space-x-2">
-                  <FlaskConical className="w-5 h-5" />
-                  <span>Create New Room</span>
+                  <Fingerprint className="w-5 h-5" />
+                  <span>Open New Case</span>
                 </div>
               )}
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
@@ -173,7 +173,7 @@ const SignIn: React.FC<SignInProps> = ({ onJoinRoom, onCreateRoom, setResetLoadi
 
           <div className="mt-6 text-center">
             <p className="text-gray-400 text-sm">
-              New to Misclue? Room IDs are shared by the host or you can create a new room.
+              New to Misclue? Ask for a Case ID from your partner, or open a new case to begin the investigation.
             </p>
           </div>
         </div>

@@ -43,8 +43,8 @@ const Lobby: React.FC<LobbyProps> = ({
     <div className="min-h-screen bg-black p-4 relative overflow-hidden">
       {/* Animated background */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 right-1/4 w-72 h-72 bg-blue-500/5 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/3 left-1/3 w-80 h-80 bg-purple-500/5 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/4 right-1/4 w-72 h-72 bg-amber-500/5 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/3 left-1/3 w-80 h-80 bg-yellow-500/5 rounded-full blur-3xl animate-pulse delay-1000"></div>
       </div>
 
       {/* Instructions Popup */}
@@ -77,14 +77,14 @@ const Lobby: React.FC<LobbyProps> = ({
         {/* Header */}
         <div className="text-center mb-8 animate-fade-in">
           <div className="inline-flex items-center space-x-3 bg-white/10 backdrop-blur-lg rounded-2xl px-6 py-3 border border-white/20">
-            <Gamepad2 className="w-6 h-6 text-cyan-400" />
-            <span className="text-xl font-bold text-white">Room: {roomId}</span>
+            <Gamepad2 className="w-6 h-6 text-amber-400" />
+            <span className="text-xl font-bold text-white">Case ID: {roomId}</span>
             <div className="flex items-center space-x-2 text-sm text-gray-300">
               <Users className="w-4 h-4" />
-              <span>{users.length} players</span>
+              <span>{users.length} detectives</span>
             </div>
             <button
-              className="ml-4 px-3 py-1 bg-cyan-500/20 rounded-full border border-cyan-400/30 flex items-center space-x-2 text-cyan-300 hover:bg-cyan-500/40 transition-all duration-200"
+              className="ml-4 px-3 py-1 bg-amber-500/20 rounded-full border border-amber-400/30 flex items-center space-x-2 text-amber-300 hover:bg-amber-500/40 transition-all duration-200"
               onClick={() => setShowInstructions(true)}
             >
               <Info className="w-4 h-4" />
@@ -99,14 +99,14 @@ const Lobby: React.FC<LobbyProps> = ({
             <div className="p-6 border-b border-white/20">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold text-white flex items-center space-x-2">
-                  <Users className="w-5 h-5 text-cyan-400" />
+                  <Users className="w-5 h-5 text-amber-400" />
                   <span>Players</span>
                 </h2>
                 <div className="text-sm text-gray-300">
                   {readyCount}/{users.length} ready
                 </div>
               </div>
-              <div className="mt-4 text-center text-cyan-300 text-sm font-semibold">
+              <div className="mt-4 text-center text-amber-300 text-sm font-semibold">
                 You need at least 3 players to play with an impostor.<br/>Otherwise, you can enjoy a regular game!
               </div>
             </div>
@@ -127,7 +127,7 @@ const Lobby: React.FC<LobbyProps> = ({
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
-                        u.id === user.id ? 'bg-cyan-500 text-white' : 'bg-gray-600 text-gray-200'
+                        u.id === user.id ? 'bg-amber-500 text-white' : 'bg-gray-600 text-gray-200'
                       }`}>
                         {u.username.charAt(0).toUpperCase()}
                       </div>
@@ -135,7 +135,7 @@ const Lobby: React.FC<LobbyProps> = ({
                         <div className="flex items-center space-x-2">
                           <span className="font-semibold text-white">{u.username}</span>
                           {index === 0 && <Crown className="w-4 h-4 text-yellow-400" />}
-                          {u.id === user.id && <span className="text-xs text-cyan-400">(You)</span>}
+                          {u.id === user.id && <span className="text-xs text-amber-400">(You)</span>}
                         </div>
                       </div>
                     </div>
@@ -164,8 +164,8 @@ const Lobby: React.FC<LobbyProps> = ({
                 onClick={onToggleReady}
                 className={`w-full py-3 rounded-xl font-semibold transition-all duration-300 ${
                   user.isReady
-                    ? 'bg-green-500 hover:bg-green-600 text-white shadow-lg shadow-green-500/25'
-                    : 'bg-gray-600 hover:bg-gray-500 text-white'
+                    ? 'bg-green-600 hover:bg-green-700 text-white shadow-lg shadow-green-500/25'
+                    : 'bg-gray-700 hover:bg-gray-600 text-white'
                 } hover:scale-105`}
               >
                 {user.isReady ? 'Ready!' : 'Mark as Ready'}
@@ -174,9 +174,9 @@ const Lobby: React.FC<LobbyProps> = ({
               {users[0]?.id === user.id && allUsersReady && users.length >= 2 && (
                 <button
                   onClick={onStartGame}
-                  className="w-full mt-3 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-semibold hover:scale-105 transition-all duration-300 shadow-lg shadow-purple-500/25"
+                  className="w-full mt-3 py-3 bg-gradient-to-r from-amber-600 to-yellow-600 text-white rounded-xl font-semibold hover:scale-105 transition-all duration-300 shadow-lg shadow-amber-500/25"
                 >
-                  Start Game
+                  Start Investigation
                 </button>
               )}
             </div>
@@ -186,7 +186,7 @@ const Lobby: React.FC<LobbyProps> = ({
           <div className="lg:col-span-2 bg-white/10 backdrop-blur-lg rounded-2xl border border-white/20 flex flex-col animate-slide-right">
             <div className="p-6 border-b border-white/20">
               <h2 className="text-xl font-bold text-white flex items-center space-x-2">
-                <MessageCircle className="w-5 h-5 text-cyan-400" />
+                <MessageCircle className="w-5 h-5 text-amber-400" />
                 <span>Chat</span>
               </h2>
             </div>
