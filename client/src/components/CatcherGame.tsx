@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, MessageCircle, Eye, Target, Shield, Users, Timer, Brain, Info } from 'lucide-react';
+import { Send, MessageCircle, Eye, Target, Shield, Users, Timer, Brain, Info, FileText, ChevronDown } from 'lucide-react';
 import { User, ChatMessage, CatcherGameProps } from '../types';
 
 // AI Chat Popup Component for Catcher
@@ -252,6 +252,9 @@ const CatcherGame: React.FC<CatcherGameProps> = ({
   const [hasSubmittedAnswer, setHasSubmittedAnswer] = useState(false);
   const [showAnswerResult, setShowAnswerResult] = useState(false);
   const [answerResult, setAnswerResult] = useState<{ isCorrect: boolean; message: string } | null>(null);
+  const [witnessLog, setWitnessLog] = useState<{ id: string; question: string; answer: string }[]>([]);
+  const [isChatCollapsed, setIsChatCollapsed] = useState(false);
+  const [isPlayersCollapsed, setIsPlayersCollapsed] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const starttimer=useRef(false);
   
@@ -354,7 +357,8 @@ const CatcherGame: React.FC<CatcherGameProps> = ({
   };
 
   const handlefakeresp=(question:string,answer:string)=>{
-      socket.emit("handle_fake_answer",question,answer)
+      socket.emit("handle_fake_answer",question,answer);
+      setWitnessLog(prev => [...prev, { id: `${Date.now()}`, question, answer }]);
   };
 
   const formatTime = (seconds: number) => {
@@ -459,7 +463,7 @@ const CatcherGame: React.FC<CatcherGameProps> = ({
   );
 
   return (
-    <div className="min-h-[80vh] bg-black p-3 relative overflow-hidden">
+    <div className="min-h-screen bg-black p-3 relative overflow-hidden">
       {/* Dynamic background */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-1/4 right-1/4 w-80 h-80 bg-red-500/10 rounded-full blur-3xl animate-pulse"></div>
@@ -476,21 +480,10 @@ const CatcherGame: React.FC<CatcherGameProps> = ({
             </div>
             <div className="h-5 w-px bg-white/20"></div>
             <div className="flex items-center space-x-2 text-sm text-gray-300">
-              <span>Room: {roomId}</span>
-            </div>
-            <div className="h-5 w-px bg-white/20"></div>
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-1 text-red-400">
-                <Target className="w-4 h-4" />
-                <span>{catcherCount} Catchers</span>
-              </div>
-              <div className="flex items-center space-x-1 text-blue-400">
-                <Shield className="w-4 h-4" />
-                <span>{normalCount} Players</span>
-              </div>
+              <span>Case ID: {roomId}</span>
             </div>
             <button
-              className="ml-4 px-3 py-1 bg-cyan-500/20 rounded-full border border-cyan-400/30 flex items-center space-x-2 text-cyan-300 hover:bg-cyan-500/40 transition-all duration-200"
+              className="ml-4 px-3 py-1 bg-red-500/20 rounded-full border border-red-400/30 flex items-center space-x-2 text-red-300 hover:bg-red-500/40 transition-all duration-200"
               onClick={() => setShowInstructions(true)}
             >
               <Info className="w-4 h-4" />
@@ -499,100 +492,47 @@ const CatcherGame: React.FC<CatcherGameProps> = ({
           </div>
         </div>
 
-        {/* Question, Clues, and Role Display */}
-        <div className="mb-6 flex flex-col items-center animate-role-reveal">
-          {/* Show Clues button should always be right of the guess card */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
-            {/* Guess the Thing Card */}
-            <div className="flex-1 max-w-3xl min-w-[300px] sm:min-w-[400px] md:min-w-[600px] px-10 py-4 rounded-2xl border-2 bg-red-500/20 border-red-400/50 shadow-lg shadow-red-500/20 backdrop-blur-lg flex flex-col items-center justify-center" style={{ minHeight: '80px' }}>
-              <h2 className="text-2xl font-bold text-red-400 mb-2 text-center">{question}</h2>
-              <div className="w-full flex flex-col items-center">
-                <div className="mt-2 p-2 bg-red-500/30 rounded-xl border-2 border-red-400/50 w-full text-center">
-                  <span className="text-red-400 font-semibold">Answer:</span> {answer}
+        {/* Main grid */}
+        <div className="grid lg:grid-cols-2 gap-6 items-start">
+          {/* Case File */}
+          <div className="lg:col-span-1 h-[calc(100vh-14rem)]">
+            <div className="bg-red-50/95 text-slate-800 rounded-2xl border-2 border-red-700 shadow-[0_10px_40px_rgba(239,68,68,0.15)] h-full flex flex-col">
+              <div className="p-5 border-b-2 border-red-700 flex items-center justify-between rounded-t-2xl bg-red-100/70">
+                <h2 className="text-xl font-bold flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-red-700" />
+                  Case File
+                </h2>
+              </div>
+              <div className="p-6 space-y-4 overflow-y-auto">
+                <div className="bg-red-100/70 border border-red-700/40 rounded-xl p-4 font-serif shadow-inner">
+                  <div className="text-sm uppercase tracking-wide text-red-700 mb-1">Case Brief</div>
+                  <div className="text-slate-900 text-lg">{question}</div>
+                </div>
+                <div className="space-y-3">
+                  {clues.map((clue, idx) => (
+                    <div key={idx} className="bg-red-100/70 border border-red-700/40 rounded-xl p-4 font-serif shadow-inner">
+                      <div className="text-sm uppercase tracking-wide text-red-700 mb-1">Document {idx + 1}</div>
+                      <div className="text-slate-900 text-base">{clue}</div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4 pt-3 border-t border-red-700/40">
+                  <div className="text-xs uppercase tracking-wide text-red-700 mb-2">Secret message to you, don't share</div>
+                  <div className="bg-red-100/70 border border-red-700/40 rounded-xl p-4 font-serif shadow-inner">
+                    <div className="text-slate-900 text-base">{answer}</div>
+                  </div>
                 </div>
               </div>
             </div>
-            {/* Show Clues Button */}
-            <button
-              className="px-8 py-5 bg-red-500/30 border border-red-400/50 rounded-xl text-white font-bold text-lg hover:bg-red-500/50 transition-all duration-200 min-w-[160px]"
-              style={{ height: '4.5rem' }}
-              onClick={() => setShowCluesPopup(true)}
-            >
-              Show Clues
-            </button>
-          </div>
-        </div>
-
-        <div className="grid lg:grid-cols-3 gap-4">
-          {/* Players Status */}
-          <div className="lg:col-span-1 bg-white/10 backdrop-blur-lg rounded-2xl border border-white/20 animate-slide-left h-[calc(100vh-16rem)] flex flex-col">
-            <div className="p-4 border-b border-white/20">
-              <h2 className="text-xl font-bold text-white flex items-center space-x-2">
-                <Users className="w-5 h-5 text-red-400" />
-                <span>Players</span>
-              </h2>
-            </div>
-
-            <div className="flex-1 p-3 space-y-2 overflow-y-auto">
-              {users.map((u, index) => (
-                <div
-                  key={u.id}
-                  className={`p-3 rounded-xl border transition-all duration-300 ${
-                    u.id === user.id
-                      ? 'bg-red-500/20 border-red-400/50 shadow-lg shadow-red-500/10'
-                      : u.role === 'catcher'
-                      ? 'bg-red-500/10 border-red-400/30'
-                      : 'bg-blue-500/10 border-blue-400/30'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold relative ${
-                        u.role === 'catcher' ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'
-                      }`}>
-                        {u.username.charAt(0).toUpperCase()}
-                        {u.role === 'catcher' && (
-                          <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-400 rounded-full flex items-center justify-center">
-                            <Target className="w-2 h-2 text-white" />
-                          </div>
-                        )}
-                      </div>
-                      <div>
-                        <div className="flex items-center space-x-2">
-                          <span className="font-semibold text-white">{u.username}</span>
-                          {u.id === user.id && <span className="text-xs text-red-400">(You)</span>}
-                        </div>
-                        <div className={`text-xs font-medium ${
-                          u.role === 'catcher' ? 'text-red-400' : 'text-blue-400'
-                        }`}>
-                          {u.role === 'catcher' ? 'Catcher' : 'Survivor'}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="p-3 border-t border-white/20">
-              <button
-                onClick={onLeaveGame}
-                className="w-full py-2 bg-gray-600 hover:bg-gray-500 text-white rounded-xl font-semibold transition-all duration-300 hover:scale-105"
-              >
-                Leave Game
-              </button>
-            </div>
           </div>
 
-          {/* AI Assistant Section */}
+          {/* Deception Desk */}
           <div className="lg:col-span-1 bg-white/10 backdrop-blur-lg rounded-2xl border border-red-400/50 shadow-lg shadow-red-500/20 animate-slide-left h-[calc(100vh-16rem)] flex flex-col">
             <div className="p-4 border-b border-red-400/20">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold text-white flex items-center space-x-2">
                   <Brain className="w-6 h-6 text-red-400" />
-                  <span>AI Response Creator</span>
+                  <span>Deception Desk</span>
                 </h2>
                 <div className="px-2 py-1 bg-red-500/20 rounded-full border border-red-400/30">
                   <span className="text-red-400 font-semibold">{aiResponseUses} uses remaining</span>
@@ -602,7 +542,7 @@ const CatcherGame: React.FC<CatcherGameProps> = ({
 
             <div className="flex-1 p-4 space-y-3 overflow-y-auto">
               <p className="text-gray-300 text-sm">
-                Create fake AI responses to deceive other players. Enter a question and craft a misleading answer to trick the survivors.
+                Craft fake witness responses to mislead detectives.
               </p>
               <button
                 onClick={() => setShowAIChat(true)}
@@ -625,6 +565,39 @@ const CatcherGame: React.FC<CatcherGameProps> = ({
                 <Target className="w-6 h-6" />
                 <span>{hasSubmittedAnswer ? 'Answer Submitted' : 'Submit Answer'}</span>
               </button>
+
+              {/* Fake Witness Log */}
+              <div className="mt-2 bg-white/5 border border-white/10 rounded-xl p-3">
+                <div className="text-white text-sm font-semibold mb-2 flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-red-400" /> Fake Witness Log
+                </div>
+                <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                  {witnessLog.length === 0 ? (
+                    <div className="text-gray-400 text-sm">No fake entries yet.</div>
+                  ) : (
+                    witnessLog.map((entry) => (
+                      <div key={entry.id} className="space-y-1">
+                        <div className="flex items-start gap-2">
+                          <div className="w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center text-xs shrink-0">
+                            <Target className="w-4 h-4" />
+                          </div>
+                          <div className="bg-red-500/20 border border-red-400/30 text-white rounded-xl px-3 py-2 text-sm max-w-[80%]">
+                            {entry.question}
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-2 justify-end">
+                          <div className="bg-red-100/80 border border-red-400/50 text-slate-900 rounded-xl px-3 py-2 text-sm max-w-[80%]">
+                            {entry.answer}
+                          </div>
+                          <div className="w-6 h-6 rounded-full bg-red-200 text-red-800 flex items-center justify-center text-xs shrink-0">
+                            <Eye className="w-4 h-4" />
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
 
               {/* Power-ups Section */}
               <div className="mt-4 space-y-3">
@@ -705,74 +678,126 @@ const CatcherGame: React.FC<CatcherGameProps> = ({
               </div>
             </div>
           </div>
-
-          {/* Game Chat */}
-          <div className="lg:col-span-1 bg-white/10 backdrop-blur-lg rounded-2xl border border-white/20 flex flex-col animate-slide-right h-[calc(100vh-16rem)]">
-            <div className="p-4 border-b border-white/20">
-              <h2 className="text-xl font-bold text-white flex items-center space-x-2">
-                <MessageCircle className="w-5 h-5 text-red-400" />
-                <span>Game Chat</span>
-              </h2>
-            </div>
-
-            {/* Messages */}
-            <div className="flex-1 p-3 overflow-y-auto space-y-2">
-              {chatMessages.length === 0 ? (
-                <div className="text-center text-gray-400 py-6">
-                  <MessageCircle className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                  <p>Game chat is empty. Communicate with other players!</p>
-                </div>
-              ) : (
-                chatMessages.map((msg) => {
-                  const msgUser = users.find(u => u.username === msg.username);
-                  return (
-                    <div
-                      key={msg.id}
-                      className={`p-2 rounded-xl max-w-xs ${
-                        msg.username === user.username
-                          ? 'bg-red-500/20 border border-red-400/30 ml-auto'
-                          : msgUser?.role === 'catcher'
-                          ? 'bg-red-500/20 border border-red-400/30'
-                          : 'bg-blue-500/20 border border-blue-400/30'
-                      } animate-message-in`}
-                    >
-                      <div className={`text-xs mb-1 flex items-center space-x-1 ${
-                        msgUser?.role === 'catcher' ? 'text-red-400' : 'text-blue-400'
-                      }`}>
-                        <span>{msg.username}</span>
-                        {msgUser?.role === 'catcher' && <Target className="w-3 h-3" />}
-                      </div>
-                      <div className="text-white">{msg.message}</div>
-                    </div>
-                  );
-                })
-              )}
-              <div ref={chatEndRef} />
-            </div>
-
-            {/* Message Input */}
-            <div className="p-3 border-t border-white/20">
-              <form onSubmit={handleSendMessage} className="flex space-x-3">
-                <input
-                  type="text"
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Send a message to all players..."
-                  className="flex-1 px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-400/20 transition-all duration-300"
-                />
-                <button
-                  type="submit"
-                  disabled={!message.trim()}
-                  className="px-5 py-2 bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-300 shadow-lg shadow-red-500/25"
-                >
-                  <Send className="w-5 h-5" />
-                </button>
-              </form>
-            </div>
-          </div>
         </div>
       </div>
 
+      {/* Floating Chat Panel */}
+      <div className="fixed bottom-4 right-4 z-20 w-80 sm:w-96 bg-white/10 backdrop-blur-lg rounded-2xl border border-white/20 shadow-xl flex flex-col">
+        <div className="p-3 border-b border-white/20 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <MessageCircle className="w-5 h-5 text-red-400" />
+            <span className="text-sm font-semibold text-white">Case Chat</span>
+          </div>
+          <button onClick={() => setIsChatCollapsed(v => !v)} className="text-red-300 hover:text-red-200">
+            <ChevronDown className={`w-4 h-4 transition-transform ${isChatCollapsed ? 'rotate-180' : ''}`} />
+          </button>
+        </div>
+        {!isChatCollapsed && (
+        <div className="flex-1 p-3 overflow-y-auto max-h-64 space-y-3">
+          {chatMessages.length === 0 ? (
+            <div className="text-center text-gray-400 py-4">
+              <MessageCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
+              <p>Share your plans…</p>
+            </div>
+          ) : (
+            chatMessages.map((msg) => {
+              const msgUser = users.find(u => u.username === msg.username);
+              return (
+                <div
+                  key={msg.id}
+                  className={`p-2 rounded-xl max-w-[75%] ${
+                    msg.username === user.username
+                      ? 'bg-red-500/20 border border-red-400/30 ml-auto'
+                      : msgUser?.role === 'catcher'
+                      ? 'bg-red-500/20 border border-red-400/30'
+                      : 'bg-white/10 border border-white/10'
+                  } animate-message-in`}
+                >
+                  <div className={`text-[10px] mb-1 flex items-center space-x-1 ${
+                    msgUser?.role === 'catcher' ? 'text-red-400' : 'text-amber-300'
+                  }`}>
+                    <span>{msg.username}</span>
+                    {msgUser?.role === 'catcher' && <Target className="w-3 h-3" />}
+                  </div>
+                  <div className="text-white text-sm">{msg.message}</div>
+                </div>
+              );
+            })
+          )}
+          <div ref={chatEndRef} />
+        </div>
+        )}
+        {!isChatCollapsed && (
+        <div className="p-3 border-t border-white/20">
+          <form onSubmit={handleSendMessage} className="flex space-x-2">
+            <input
+              type="text"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="Type a message…"
+              className="flex-1 px-3 py-2 bg-white/5 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-400/20 transition-all duration-300"
+            />
+            <button
+              type="submit"
+              disabled={!message.trim()}
+              className="px-4 py-2 bg-gradient-to-r from-red-500 to-orange-600 text-white rounded-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-300 shadow-lg shadow-red-500/25"
+            >
+              <Send className="w-4 h-4" />
+            </button>
+          </form>
+        </div>
+        )}
+      </div>
+
+      {/* Floating Players Panel */}
+      <div className="fixed bottom-4 left-4 z-20 w-72 sm:w-80 bg-white/10 backdrop-blur-lg rounded-2xl border border-white/20 shadow-xl flex flex-col">
+        <div className="p-3 border-b border-white/20 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Users className="w-5 h-5 text-red-400" />
+            <span className="text-sm font-semibold text-white">Players</span>
+          </div>
+          <button onClick={() => setIsPlayersCollapsed(v => !v)} className="text-red-300 hover:text-red-200">
+            <ChevronDown className={`w-4 h-4 transition-transform ${isPlayersCollapsed ? 'rotate-180' : ''}`} />
+          </button>
+        </div>
+        {!isPlayersCollapsed && (
+        <div className="flex-1 p-3 overflow-y-auto max-h-56 space-y-2">
+          {users.map((u) => (
+            <div
+              key={u.id}
+              className={`p-2 rounded-xl border text-sm flex items-center justify-between ${
+                u.role === 'catcher'
+                  ? 'bg-red-500/10 border-red-400/30'
+                  : (u.id === user.id
+                    ? 'bg-red-500/20 border-red-400/30'
+                    : 'bg-white/10 border-white/10')
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <div className={`w-7 h-7 rounded-full flex items-center justify-center font-bold ${u.role === 'catcher' ? 'bg-red-500 text-white' : 'bg-amber-500 text-white'}`}>{u.username.charAt(0).toUpperCase()}</div>
+                <div className="flex flex-col leading-tight">
+                  <span className="text-white text-[13px]">{u.username} {u.id === user.id && <span className="text-red-300 text-[10px]">(you)</span>}</span>
+                  <span className={`text-[10px] ${u.role === 'catcher' ? 'text-red-400' : 'text-amber-300'}`}>{u.role === 'catcher' ? 'Catcher' : 'Detective'}</span>
+                </div>
+              </div>
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+            </div>
+          ))}
+        </div>
+        )}
+        {!isPlayersCollapsed && (
+        <div className="p-3 border-t border-white/20">
+          <button
+            onClick={onLeaveGame}
+            className="w-full py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-xl text-sm font-semibold transition-all duration-300"
+          >
+            Leave Case
+          </button>
+        </div>
+        )}
+      </div>
+
+      {/* Popups */}
       {showAIChat && (
         <AIChatPopup 
           onClose={() => setShowAIChat(false)} 
@@ -835,8 +860,6 @@ const CatcherGame: React.FC<CatcherGameProps> = ({
       )}
     </div>
   );
-};
+}
 
 export default CatcherGame;
-
- 

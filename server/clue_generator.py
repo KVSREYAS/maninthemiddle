@@ -31,18 +31,52 @@ llm2 = ChatGroq(
 
 # Basic-GK answer pool grouped by type (animals, landmarks, objects, natural)
 GK_POOL = {
-    "animal": [
-        "cat", "dog", "horse", "owl", "fish"
+    "superhero": [
+        "Spider-Man", "Iron Man", "Wonder Woman", "Batman", "Superman", 
+        "Captain America", "Hulk", "Thor", "Black Panther", "Aquaman", 
+        "Deadpool", "Wolverine", "Flash", "Green Lantern", "Storm"
     ],
-    "landmark": [
-        "eiffel tower", "pyramids", "statue of liberty"
+    "mythical creature": [
+        "Dragon", "Unicorn", "Phoenix", "Mermaid", "Griffin", 
+        "Minotaur", "Centaur", "Pegasus", "Kraken", "Yeti", 
+        "Bigfoot", "Sphinx", "Chimera", "Hydra", "Vampire", 
+        "Werewolf"
     ],
-    "object": [
-        "umbrella", "clock", "bicycle", "ladder", "bread", "door",
-        "window", "glasses", "polaroid", "backpack", "candle", "chair"
+    "famous movie": [
+        "Star Wars", "Harry Potter", "Jurassic Park", "Titanic", "The Avengers", 
+        "Lion King", "Inception", "Matrix", "Forrest Gump", "Gladiator", 
+        "Frozen", "Pulp Fiction", "Jaws", "Avatar", "Black Panther", 
+        "Toy Story"
     ],
-    "natural": [
-        "sun", "rainbow"
+    "iconic food": [
+        "Pizza", "Sushi", "Burger", "Taco", "Pasta", 
+        "Curry", "Croissant", "Ramen", "Dumpling", "Paella", 
+        "Falafel", "Burrito", "Bagel", "Pho", "Nacho"
+    ],
+    "world city": [
+        "New York", "Tokyo", "Paris", "London", "Rome", 
+        "Sydney", "Dubai", "Rio", "Amsterdam", "Hong Kong", 
+        "Barcelona", "Singapore", "Istanbul", "Miami", "Cape Town"
+    ],
+    "sports star": [
+        "Lionel Messi", "Cristiano Ronaldo", "Serena Williams", "Usain Bolt", "Michael Jordan", 
+        "Tom Brady", "LeBron James", "Simone Biles", "Tiger Woods", "Roger Federer", 
+        "Muhammad Ali", "Neymar", "Kobe Bryant", "Rafael Nadal", "Mia Hamm"
+    ],
+    "video game": [
+        "Mario Bros", "Zelda", "Minecraft", "Fortnite", "Pokémon", 
+        "GTA V", "Tetris", "Wii Sports", "Overwatch", "Skyrim", 
+        "Among Us", "Animal Crossing", "Halo", "Call of Duty", "Portal"
+    ],
+    "space object": [
+        "Milky Way", "Black Hole", "Comet", "Meteor", "Nebula", 
+        "Supernova", "Star", "Moon", "Mars", "Jupiter", 
+        "Saturn", "Asteroid", "Galaxy", "Venus", "Pluto"
+    ],
+    "famous invention": [
+        "Light Bulb", "Telephone", "Airplane", "Internet", "Wheel", 
+        "Penicillin", "Steam Engine", "Camera", "Radio", "Television", 
+        "Computer", "Car", "Refrigerator", "Rocket", "Microscope"
     ]
 }
 
@@ -57,7 +91,10 @@ Requirements:
 1) Crete the scene based on the answer given but do not mention the answer in the scene.
 2) Build a short crime-scene description (1-2 sentences) that would plausibly contain the answer as an object/landmark/animal.
 3) Create TWO in-universe written documents recovered at the scene ("manifesto", "diary fragment", "shipping note", "police tag", etc.). Each document should be 1-2 sentences long and suggest partial clues about the answer but NOT name it.
-5) The two documents alone should NOT be sufficient to determine the answer with certainty — they must require at least one yes/no interrogation to resolve ambiguity.
+4) Make sure the clues makes sense in the context of the crime scene and is relevant to the answer. But do not mention the answer in the clues nor give away the answer in the crime scene.
+5) The clues should be absurd obscure enough that they shouldnt be able to solve it without brainstorming and help from the witness.
+5) Do not use quotations on certain phrases
+6) The two documents alone should NOT be sufficient to determine the answer with certainty — they must require at least one yes/no interrogation to resolve ambiguity.
 Output format (STRICT JSON, no extra text):
 {{
   "crime_scene": "...",
@@ -164,4 +201,5 @@ def answer_question(answer, question):
 
 
 if __name__ == "__main__":
-    print(answer_question("cat","Does it have whiskers"))
+    # print(answer_question("cat","Does it have whiskers"))
+    print(generate_clue())

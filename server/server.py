@@ -331,8 +331,10 @@ def handle_fake_answer(question,answer):
     ans="AI: "+answer
     for user in rooms[roomid]["connected_users"]:
         print(f"Sending message to {user}")
-        send(question_string,to=user)
-        send(ans,to=user)
+        socketio.emit('witness_answer',{
+            'question': question,
+            'answer': answer
+        },to=user)
 
 
 

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, MessageCircle, Eye, Target, Shield, Users, Timer, Info, UserSearch, FileText, Key } from 'lucide-react';
+import { Send, MessageCircle, Eye, Target, Shield, Users, Timer, Info, UserSearch, FileText, Key, ChevronDown } from 'lucide-react';
 import { User, ChatMessage, GameProps } from '../types';
 
 declare global{
@@ -313,6 +313,8 @@ const Game: React.FC<GameProps> = ({
   const [showGameOver, setShowGameOver] = useState(false);
   const [witnessLog, setWitnessLog] = useState<{ id: string; question: string; answer?: string }[]>([]);
   const handledWitnessIdsRef = useRef<Set<string>>(new Set());
+  const [isChatCollapsed, setIsChatCollapsed] = useState(false);
+  const [isPlayersCollapsed, setIsPlayersCollapsed] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
   // 2. Add showCluesPopup state
   const [showCluesPopup, setShowCluesPopup] = useState(false);
@@ -649,10 +651,16 @@ useEffect(()=>{
 
       {/* Floating Chat Panel */}
       <div className="fixed bottom-4 right-4 z-20 w-80 sm:w-96 bg-white/10 backdrop-blur-lg rounded-2xl border border-white/20 shadow-xl flex flex-col">
-        <div className="p-3 border-b border-white/20 flex items-center gap-2">
-          <MessageCircle className="w-5 h-5 text-amber-400" />
-          <span className="text-sm font-semibold text-white">Case Chat</span>
+        <div className="p-3 border-b border-white/20 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <MessageCircle className="w-5 h-5 text-amber-400" />
+            <span className="text-sm font-semibold text-white">Case Chat</span>
+          </div>
+          <button onClick={() => setIsChatCollapsed(v => !v)} className="text-amber-300 hover:text-amber-200">
+            <ChevronDown className={`w-4 h-4 transition-transform ${isChatCollapsed ? 'rotate-180' : ''}`} />
+          </button>
         </div>
+        {!isChatCollapsed && (
         <div className="flex-1 p-3 overflow-y-auto max-h-64 space-y-3">
           {chatMessages.length === 0 ? (
             <div className="text-center text-gray-400 py-4">
@@ -686,6 +694,8 @@ useEffect(()=>{
           )}
           <div ref={chatEndRef} />
         </div>
+        )}
+        {!isChatCollapsed && (
         <div className="p-3 border-t border-white/20">
           <form onSubmit={handleSendMessage} className="flex space-x-2">
             <input
@@ -704,14 +714,21 @@ useEffect(()=>{
             </button>
           </form>
         </div>
+        )}
       </div>
 
       {/* Floating Players Panel */}
       <div className="fixed bottom-4 left-4 z-20 w-72 sm:w-80 bg-white/10 backdrop-blur-lg rounded-2xl border border-white/20 shadow-xl flex flex-col">
-        <div className="p-3 border-b border-white/20 flex items-center gap-2">
-          <Users className="w-5 h-5 text-amber-400" />
-          <span className="text-sm font-semibold text-white">Detectives</span>
+        <div className="p-3 border-b border-white/20 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Users className="w-5 h-5 text-amber-400" />
+            <span className="text-sm font-semibold text-white">Detectives</span>
+          </div>
+          <button onClick={() => setIsPlayersCollapsed(v => !v)} className="text-amber-300 hover:text-amber-200">
+            <ChevronDown className={`w-4 h-4 transition-transform ${isPlayersCollapsed ? 'rotate-180' : ''}`} />
+          </button>
         </div>
+        {!isPlayersCollapsed && (
         <div className="flex-1 p-3 overflow-y-auto max-h-56 space-y-2">
           {users.map((u) => (
             <div
@@ -735,6 +752,8 @@ useEffect(()=>{
             </div>
           ))}
         </div>
+        )}
+        {!isPlayersCollapsed && (
         <div className="p-3 border-t border-white/20">
           <button
             onClick={onLeaveGame}
@@ -743,6 +762,7 @@ useEffect(()=>{
             Leave Case
           </button>
         </div>
+        )}
       </div>
 
       {showAIChat && (
